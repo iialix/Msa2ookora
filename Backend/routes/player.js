@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const playerController = require('../controllers/player');
+const playerController = require('../controllers/games');
 
+router.get('/password', playerController.getPasswordPlayers);
+router.get('/bedonKalam', playerController.getBedonKalamPlayers);
+router.get('/changePlayer', playerController.getAnotherPlayer);
 
-router.get('/players', playerController.getPlayers);
+router.get('/anaMeen', playerController.getAnaMeen);
+
 
 module.exports = router;
