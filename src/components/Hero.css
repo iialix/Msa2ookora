@@ -1,0 +1,32 @@
+.hero {
+    position: relative; /* Essential: This contains the absolute overlay */
+    background-image: url("/hero_background.png");
+    background-size: cover;
+    background-position: center;
+    height: 50vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Keeps the overlay from spilling out */
+}
+
+/* Removed the space between .hero and ::before */
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1; /* Lower than the content */
+}
+
+.hero-content {
+    position: relative; /* REQUIRED for z-index to work */
+    z-index: 2; /* Higher than the overlay */
+    color: white;
+    text-align: center;
+}

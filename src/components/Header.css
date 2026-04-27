@@ -1,0 +1,60 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    height: 150px;
+    top: 0;
+    z-index: 1000; /* Stays above the hero content */
+    color: white;
+}
+
+.logo img {
+    max-width: 200px;
+    align-self: center;
+}
+
+.logo span {
+    color: aquamarine; /* Accent color */
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hide nav links on smaller screens */
+    }
+    .navbar {
+        justify-content: center;
+    }
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #ccc;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: purple;
+}
+
+.login-btn {
+    padding: 10px 20px;
+    background-color: transparent;
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background-color: #ff4757;
+    color: white;
+}

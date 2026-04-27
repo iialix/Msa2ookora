@@ -1,0 +1,127 @@
+.main-footer {
+    background-color: #0f0d13;
+    color: #ffffff;
+    padding: 60px 5% 20px;
+    position: relative;
+    border-top: 1px solid rgba(127, 255, 212, 0.1);
+    overflow: hidden;
+}
+
+/* خط التوهج العلوي ليتناسب مع البطاقات */
+.footer-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #7fffd4, transparent);
+    box-shadow: 0 0 15px #7fffd4;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-brand,
+.footer-links,
+.footer-newsletter {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-logo {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #7fffd4; /* Aquamarine */
+}
+
+.footer-logo span {
+    color: #fff;
+}
+
+.footer-brand p {
+    line-height: 1.6;
+    color: #b0b0b0;
+}
+
+.footer-links h3,
+.footer-newsletter h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #7fffd4;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: #b0b0b0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #7fffd4;
+}
+
+.subscribe-form {
+    display: flex;
+    margin-top: 15px;
+}
+
+.subscribe-form input {
+    padding: 10px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: white;
+    border-radius: 0 8px 8px 0; /* حواف دائرية لليمين (لأننا في RTL) */
+    flex: 1;
+    outline: none;
+}
+
+.subscribe-form button {
+    padding: 10px 20px;
+    background-color: #7fffd4;
+    border: none;
+    color: #000;
+    font-weight: bold;
+    border-radius: 8px 0 0 8px; /* حواف دائرية لليسار */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.subscribe-form button:hover {
+    transform: scale(1.05);
+    background-color: #40e0d0;
+}
+
+.footer-bottom {
+    margin-top: 50px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* توافق الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .subscribe-form {
+        justify-content: center;
+    }
+}

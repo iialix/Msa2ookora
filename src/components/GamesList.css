@@ -1,0 +1,58 @@
+.games-section {
+    padding: 40px 5%;
+    background-color: black;
+    color: white;
+}
+
+.section-title {
+    margin-bottom: 30px;
+    font-size: 2rem;
+    border-left: 5px solid #ff4757;
+    padding-left: 15px;
+}
+
+.games-grid {
+    display: grid;
+    /* This line makes it responsive: cards will be at least 250px wide */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.game-card {
+    /* CRITICAL: Must be transparent to see the BorderGlow mesh background */
+    background: transparent !important;
+    border-radius: inherit;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-container {
+    position: relative;
+    overflow: hidden;
+    /* Optional: add a slight mask so the image fades into the glow at the top */
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
+/* 1. Define the base state with the transition */
+.game-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+
+    /* This is the key. Putting the transition here ensures 
+       it animates BOTH when entering and leaving the hover state.
+    */
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. Define only the change in the hover state */
+.game-card:hover .game-image {
+    transform: scale(1.1);
+}
+
+.game-info {
+    padding: 20px;
+    background: transparent; /* Keep it clear */
+}
