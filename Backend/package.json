@@ -10,10 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
     "body-parser": "^2.2.2",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
-    "mysql2": "^3.22.2",
     "sequelize": "^6.37.8",
     "uuid": "^14.0.0"
   },

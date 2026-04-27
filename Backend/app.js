@@ -3,7 +3,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const playerRoutes = require('./routes/player');
-const db = require('./util/database');
+const { testConnection } = require('./util/database');
 
 const app = express();
 
@@ -20,6 +20,19 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/health', async (req, res) => {
+    try {
+        await testConnection();
+        res.status(200).json({ status: 'ok' });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message || 'Supabase health check failed' });
+    }
+});
+
 app.use(playerRoutes);
+
+testConnection()
+    .then(() => console.log('Supabase connection OK'))
+    .catch((error) => console.error('Supabase connection failed:', error.message || error));
 
 app.listen(8080);
