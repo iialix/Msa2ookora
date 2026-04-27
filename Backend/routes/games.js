@@ -6,9 +6,12 @@ router.get('/password', playerController.getPasswordPlayers);
 router.get('/bedonKalam', playerController.getBedonKalamPlayers);
 router.get('/changePlayer', playerController.getAnotherPlayer);
 
-router.get('/anaMeen', playerController.getAnaMeen);
+router.get('/anaMeen', playerController.getAnaMeenInfo);
 
-router.get('/topTen', playerController.getTopTen);
+router.get('/topTen', playerController.getTopTenQuestions);
 
+router.get('/bank', playerController.getBankQuestions);
+
+router.get('/offside', playerController.getOffsideQuestions);
 
 module.exports = router;

@@ -97,5 +97,38 @@ class TopTen {
     }
 }
 
+class Bank {
+    constructor(question, answer) {
+        this.question = question;
+        this.answer = answer;
+    }
 
-module.exports = { Player, AnaMeen, TopTen };
+    static async getBankQuestions() {
+    const { data, error } = await supabase
+        .rpc('get_random_bank', { limit_count: 72 });
+
+        if (error) throw error;
+        if (!data) return [];
+
+        return data;
+    }
+
+}
+
+class Offside {
+    constructor(question) {
+        this.question = question;
+    }
+
+    static async getOffsideQuestions() {
+    const { data, error } = await supabase
+        .rpc('get_random_offside', { limit_count: 10 });
+        
+        if (error) throw error;
+        if (!data) return [];
+
+        return data;
+    }
+}
+
+module.exports = { Player, AnaMeen, TopTen, Bank, Offside };
