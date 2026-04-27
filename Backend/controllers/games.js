@@ -1,5 +1,4 @@
-const { Player, AnaMeen } = require('../models/games.js');
-
+const { Player, AnaMeen, TopTen } = require('../models/games.js');
 
 exports.getPasswordPlayers = async (req, res) => {
     try {
@@ -43,3 +42,14 @@ exports.getAnaMeen = async (req, res) => {
         console.log(error);
     }
 };
+
+exports.getTopTen = async (req, res) => {
+    try {
+        const info = await TopTen.getTopTen();
+        res.status(200).json(info);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch info' });
+        console.log(error);
+    }
+};
+

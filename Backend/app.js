@@ -2,7 +2,7 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const playerRoutes = require('./routes/player');
+const playerRoutes = require('./routes/games');
 const { testConnection } = require('./util/database');
 
 const app = express();

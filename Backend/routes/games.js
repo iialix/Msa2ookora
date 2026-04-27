@@ -8,5 +8,7 @@ router.get('/changePlayer', playerController.getAnotherPlayer);
 
 router.get('/anaMeen', playerController.getAnaMeen);
 
+router.get('/topTen', playerController.getTopTen);
+
 
 module.exports = router;
