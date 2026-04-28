@@ -19,3 +19,14 @@ export async function fetchChangePlayer() {
 
     return data;
 }
+
+export default async function fetchBedonKalam() {
+    const response = await fetch("http://localhost:8080/bedonkalam");
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch change player");
+    }
+
+    return data;
+}

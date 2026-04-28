@@ -63,8 +63,8 @@ const Footer = () => {
 
             <div className="footer-bottom">
                 <p>
-                    جميع الحقوق محفوظة &copy; {new Date().getFullYear()}{" "}
-                    ألعابـنا.
+                    جميع الحقوق محفوظة &copy; {new Date().getFullYear()} مســاؤو
+                    كــورة.
                 </p>
             </div>
         </footer>

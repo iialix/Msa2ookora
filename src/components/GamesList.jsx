@@ -12,12 +12,14 @@ export default function GamesList() {
             id: 1,
             title: "Password Challenge",
             image: "/Password.png",
+            urlText: "password-challenge",
         },
-        // {
-        //     id: 2,
-        //     title: "بدون كلام",
-        //     image: "/bedonKalam.png",
-        // },
+        {
+            id: 2,
+            title: "بدون كلام",
+            image: "/bedonKalam.png",
+            urlText: "bedon-kalam",
+        },
         // {
         //     id: 3,
         //     title: "أنا مين",
@@ -37,7 +39,7 @@ export default function GamesList() {
 
                     return (
                         <Link
-                            to={`/${gameSlug}`}
+                            to={`/${game.urlText}`}
                             key={game.id}
                             style={{
                                 textDecoration: "none",

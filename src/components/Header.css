@@ -14,6 +14,11 @@
     align-self: center;
 }
 
+.logo img:hover {
+    transform: scale(1.05);
+    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .logo span {
     color: aquamarine; /* Accent color */
 }
