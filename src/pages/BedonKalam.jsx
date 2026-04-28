@@ -17,6 +17,7 @@ export default function BedonKalam() {
     const [gameResult, setGameResult] = useState(null);
     const [skippedRounds, setSkippedRounds] = useState(0);
     const [earlyWin, setEarlyWin] = useState(null);
+    const [continued, setContinued] = useState(false);
 
     const { data, isPending, isError } = useQuery({
         queryKey: ["bedonKalam"],
@@ -88,23 +89,25 @@ export default function BedonKalam() {
 
         // 4. فحص الفوز المبكر (Early Win)
         // المعادلة: إذا وصل فريق لأكثر من نصف الجولات المتبقية "الممكنة"
-        const totalRounds = 10;
-        const roundsPlayed = round;
-        const roundsRemaining = totalRounds - roundsPlayed;
+        if (!continued) {
+            const totalRounds = 10;
+            const roundsPlayed = round;
+            const roundsRemaining = totalRounds - roundsPlayed;
 
-        const teamAScore = currentScores.teamA;
-        const teamBScore = currentScores.teamB;
+            const teamAScore = currentScores.teamA;
+            const teamBScore = currentScores.teamB;
 
-        // Check if teamA is unreachable
-        if (teamAScore > teamBScore + roundsRemaining) {
-            setEarlyWin("الفريق 1");
-            return;
-        }
+            // Check if teamA is unreachable
+            if (teamAScore > teamBScore + roundsRemaining) {
+                setEarlyWin("الفريق 1");
+                return;
+            }
 
-        // Check if teamB is unreachable
-        if (teamBScore > teamAScore + roundsRemaining) {
-            setEarlyWin("الفريق 2");
-            return;
+            // Check if teamB is unreachable
+            if (teamBScore > teamAScore + roundsRemaining) {
+                setEarlyWin("الفريق 2");
+                return;
+            }
         }
 
         // 5. فحص نهاية اللعبة (الجولة 10)
@@ -124,6 +127,7 @@ export default function BedonKalam() {
     };
 
     const handleContinue = () => {
+        setContinued(true);
         setEarlyWin(null);
         if (round >= 10) {
             const { teamA, teamB } = scores;
