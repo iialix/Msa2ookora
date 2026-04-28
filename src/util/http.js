@@ -20,7 +20,7 @@ export async function fetchChangePlayer() {
     return data;
 }
 
-export default async function fetchBedonKalam() {
+export async function fetchBedonKalam() {
     const response = await fetch("http://localhost:8080/bedonkalam");
     const data = await response.json();
 
