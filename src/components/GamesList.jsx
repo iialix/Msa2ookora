@@ -26,6 +26,12 @@ export default function GamesList() {
             image: "/anameen.png",
             urlText: "ana-meen",
         },
+        {
+            id: 4,
+            title: "offside",
+            image: "/offside.png",
+            urlText: "offside",
+        },
     ];
 
     return (
