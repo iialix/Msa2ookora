@@ -1,3 +1,29 @@
+/* --- نتيجة اللعبة (Game Result) --- */
+.game-result-container {
+    max-width: 80%;
+    margin: 40px auto;
+    min-width: 50%;
+    background: #1a1625;
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid rgba(127, 255, 212, 0.2);
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-result-container h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.game-result-container .playAgain {
+    margin-top: 30px;
+}
+
 .scoreboard {
     display: flex;
     justify-content: center;
@@ -6,7 +32,7 @@
     font-family: "Cairo", sans-serif;
 }
 
-.score-box2 {
+.score-box {
     width: 130px;
     height: 130px;
     border-radius: 16px;
@@ -15,50 +41,23 @@
     justify-content: center;
     align-items: center;
     transition: all 0.3s ease;
-    position: relative;
     border: 2px solid transparent;
 }
 
-@media (max-width: 375px) {
-    .score-box2 {
-        width: 120px;
-        height: 120px;
-    }
-}
-@media (max-width: 320px) {
-    .score-box2 {
-        width: 100px;
-        height: 100px;
-    }
-}
-
-.score-box2 span {
+.score-box span {
     font-size: 1rem;
     margin-bottom: 10px;
     font-weight: 600;
 }
 
-.score-box2 strong {
+.score-box strong {
     font-size: 3rem;
     font-weight: bold;
     line-height: 1;
     color: #ffffff;
 }
 
-.score-box2 {
-    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
-    border-color: rgba(255, 255, 255, 0.05);
-}
-
-.score-box2.teamA {
-    order: 1;
-}
-.score-box2.teamB {
-    order: 3;
-}
-
-/* الفريق 1 (البنفسجي) */
-.score-box2.teamA.active {
+.score-box:first-child {
     background: rgba(108, 92, 231, 0.1);
     border-color: #6c5ce7;
     box-shadow:
@@ -66,12 +65,11 @@
         inset 0 0 10px rgba(108, 92, 231, 0.3);
     order: 1;
 }
-.score-box2.teamA.active span {
+.score-box:first-child span {
     color: #a29bfe;
 }
 
-/* الفريق 2 (الأكوامارين) */
-.score-box2.teamB.active {
+.score-box:last-child {
     background: rgba(127, 255, 212, 0.1);
     border-color: #7fffd4;
     box-shadow:
@@ -79,9 +77,10 @@
         inset 0 0 10px rgba(127, 255, 212, 0.2);
     order: 3;
 }
-.score-box2.teamB.active span {
+.score-box:last-child span {
     color: #7fffd4;
 }
+
 .scoreboard::before {
     content: "ضد";
     color: #757575;

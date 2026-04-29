@@ -22,12 +22,12 @@ export default function ScoreBoard({
             </span>
             <div className="scoreboard">
                 <div
-                    className={`score-box2 teamA ${selectedTeam === 1 ? "active" : ""} ${activeClass}`}>
+                    className={`score-box teamA ${selectedTeam === 1 ? "active" : ""} ${activeClass}`}>
                     <span>الفريق 1</span>
                     <strong>{scores.teamA}</strong>
                 </div>
                 <div
-                    className={`score-box2 teamB ${selectedTeam === 2 ? "active" : ""} ${activeClass}`}>
+                    className={`score-box teamB ${selectedTeam === 2 ? "active" : ""} ${activeClass}`}>
                     <span>الفريق 2</span>
                     <strong>{scores.teamB}</strong>
                 </div>

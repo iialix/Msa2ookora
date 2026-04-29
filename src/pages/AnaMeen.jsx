@@ -5,6 +5,7 @@ import { fetchAnaMeen } from "../util/http";
 
 import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
+import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 
 const TEAMS = { A: "الفريق 1", B: "الفريق 2" };
@@ -26,6 +27,7 @@ export default function AnaMeen() {
     const [answerText, setAnswerText] = useState("");
     const [modalFeedback, setModalFeedback] = useState(null); // "correct" | "wrong"
     const [reset, setReset] = useState(1);
+    const [earlyWin, setEarlyWin] = useState(false);
 
     // Track which clue index each team answered wrong on (-1 = never)
     // A team is disabled on wrongClue and wrongClue+1, free from wrongClue+2 onward
@@ -122,10 +124,19 @@ export default function AnaMeen() {
             current.name.trim().toLowerCase();
 
         if (correct) {
-            setScores((prev) => ({ ...prev, [key]: prev[key] + 1 }));
+            setScores((prev) => {
+                const newScore = prev[key] + 1;
+
+                if (newScore === 2 && !earlyWin) {
+                    setEarlyWin(selectedTeam === "A" ? TEAMS.A : TEAMS.B);
+                }
+
+                return { ...prev, [key]: newScore };
+            });
             setModalFeedback("correct");
             setRoundOver(true);
             setShowAnswer(true);
+
             setTimeout(() => setShowModal(false), 1200);
         } else {
             setModalFeedback("wrong");
@@ -218,6 +229,11 @@ export default function AnaMeen() {
         }
     }
 
+    const handleContinue = () => {
+        setEarlyWin(null);
+        nextRound(scores);
+    };
+
     // ── Game Over Screen ──────────────────────────────────────────────────────
     if (gameResult) {
         return (
@@ -231,6 +247,10 @@ export default function AnaMeen() {
     // ── Main Game ─────────────────────────────────────────────────────────────
     return (
         <div className="ana-meen-game-container" dir="rtl">
+            <EarlyWin
+                earlyWin={earlyWin}
+                scores={scores}
+                handleContinue={handleContinue}></EarlyWin>
             {/* ── Answer Modal ── */}
             {showModal && (
                 <div className="popup-overlay">

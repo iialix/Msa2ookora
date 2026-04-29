@@ -53,7 +53,7 @@ export default function PasswordChallenge() {
         setScores(newScores);
 
         // ✅ NEW: Check if a team reached 5 points — show popup before continuing
-        if (newScores[team] >= 5) {
+        if (newScores[team] >= 5 && !earlyWin) {
             const winnerName = team === "teamA" ? "الفريق 1" : "الفريق 2";
             setEarlyWin(winnerName);
             return; // stop here, don't advance round yet

@@ -23,3 +23,91 @@
 .game-result-container .playAgain {
     margin-top: 30px;
 }
+
+.scoreboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-family: "Cairo", sans-serif;
+}
+
+.result-box.teamA {
+    width: 130px;
+    height: 130px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
+    border-color: rgba(255, 255, 255, 0.05);
+}
+.result-box.teamB {
+    width: 130px;
+    height: 130px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.result-box.teamA {
+    order: 1;
+}
+
+.result-box.teamB {
+    order: 3;
+}
+
+.result-box span {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.result-box strong {
+    font-size: 3rem;
+    font-weight: bold;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.result-box.teamA.active {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: #6c5ce7;
+    box-shadow:
+        0 0 15px rgba(108, 92, 231, 0.5),
+        inset 0 0 10px rgba(108, 92, 231, 0.3);
+    order: 1;
+}
+.result-box.teamA.active span {
+    color: #a29bfe;
+}
+
+.result-box.teamB.active {
+    background: rgba(127, 255, 212, 0.1);
+    border-color: #7fffd4;
+    box-shadow:
+        0 0 15px rgba(127, 255, 212, 0.4),
+        inset 0 0 10px rgba(127, 255, 212, 0.2);
+    order: 3;
+}
+.result-box.teamB.active span {
+    color: #7fffd4;
+}
+
+.scoreboard::before {
+    content: "ضد";
+    color: #757575;
+    font-size: 1.2rem;
+    font-weight: 600;
+    order: 2;
+}
