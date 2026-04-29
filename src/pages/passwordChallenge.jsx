@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import "./passwordChallenge.css";
 import { fetchChangePlayer, fetchPasswordPlayers } from "../util/http";
+import Timer from "../components/Timer";
+import ScoreBoard from "../components/ScoreBoard";
+import EarlyWin from "../components/EarlyWin";
+import GameResult from "../components/GameResult";
 
 const formatImageUrl = (url) => url.replace(".", "backend");
 
@@ -22,10 +26,16 @@ export default function PasswordChallenge() {
     const { data, isPending, isError } = useQuery({
         queryKey: ["passwordPlayers"],
         queryFn: fetchPasswordPlayers,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     });
 
     const { mutateAsync: changePlayerMutation } = useMutation({
         mutationFn: fetchChangePlayer,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     });
 
     useEffect(() => {
@@ -38,28 +48,6 @@ export default function PasswordChallenge() {
         }
     }, [data]);
 
-    useEffect(() => {
-        let interval = null;
-        if (isActive && timeLeft > 0) {
-            interval = setInterval(() => {
-                setTimeLeft((time) => time - 1);
-            }, 1000);
-        } else if (timeLeft === 0) {
-            setIsActive(false);
-            clearInterval(interval);
-        }
-        return () => clearInterval(interval);
-    }, [isActive, timeLeft]);
-
-    const startTimer = () => {
-        if (!isActive) {
-            setTimeLeft(30);
-            setIsActive(true);
-        } else {
-            resetTurn();
-        }
-    };
-
     const addPoint = (team) => {
         const newScores = { ...scores, [team]: scores[team] + 1 };
         setScores(newScores);
@@ -68,7 +56,6 @@ export default function PasswordChallenge() {
         if (newScores[team] >= 5) {
             const winnerName = team === "teamA" ? "الفريق 1" : "الفريق 2";
             setEarlyWin(winnerName);
-            resetTurn();
             return; // stop here, don't advance round yet
         }
 
@@ -93,8 +80,6 @@ export default function PasswordChallenge() {
                 }
                 return nextIndex;
             });
-
-            resetTurn();
         } else {
             if (currentScores.teamA === currentScores.teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
@@ -107,13 +92,7 @@ export default function PasswordChallenge() {
                     }`,
                 );
             }
-            resetTurn();
         }
-    };
-
-    const resetTurn = () => {
-        setIsActive(false);
-        setTimeLeft(30);
     };
 
     // ✅ NEW: Continue the same game (dismiss popup, advance round normally)
@@ -158,64 +137,29 @@ export default function PasswordChallenge() {
 
     if (gameResult) {
         return (
-            <div className="game-result-container" dir="rtl">
-                <div className="game-result">
-                    <h2>{gameResult}</h2>
-                    <div className="scoreboard">
-                        <div className="score-box">
-                            <span>الفريق 1</span>{" "}
-                            <strong>{scores.teamA}</strong>
-                        </div>
-                        <div className="score-box">
-                            <span>الفريق 2</span>{" "}
-                            <strong>{scores.teamB}</strong>
-                        </div>
-                    </div>
-                    <button
-                        className="btn-primary playAgain"
-                        onClick={() => window.location.reload()}>
-                        العب مجدداً
-                    </button>
-                </div>
-            </div>
+            <GameResult
+                gameResult={gameResult}
+                scores={scores}
+                handleNewGame={handleNewGame}></GameResult>
         );
     }
 
     return (
         <div className="game-container" dir="rtl">
-            {earlyWin && (
-                <div className="popup-overlay">
-                    <div className="popup-box">
-                        <h2>🏆 {earlyWin} وصل إلى 5 نقاط!</h2>
-                        <p>
-                            هل تريدون الاستمرار في نفس اللعبة أم البدء من جديد؟
-                        </p>
-                        <div className="popup-buttons">
-                            <button
-                                className="btn-primary"
-                                onClick={handleContinue}>
-                                استمر في اللعب
-                            </button>
-                            <button
-                                className="btn-secondary"
-                                onClick={handleNewGame}>
-                                لعبة جديدة
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Early Win Popup */}
+            <EarlyWin
+                earlyWin={earlyWin}
+                scores={scores}
+                handleContinue={handleContinue}></EarlyWin>
 
+            {/* Header */}
             <div className="game-header">
-                <span className="round-badge">الجولة: {round} / 8</span>
-                <div className="scoreboard">
-                    <div className="score-box">
-                        <span>الفريق 1</span> <strong>{scores.teamA}</strong>
-                    </div>
-                    <div className="score-box">
-                        <span>الفريق 2</span> <strong>{scores.teamB}</strong>
-                    </div>
-                </div>
+                <ScoreBoard
+                    isTurns={false}
+                    selectedTeam={null}
+                    round={round}
+                    scores={scores}
+                    totalRounds={8}></ScoreBoard>
             </div>
 
             <div className="player-section">
@@ -239,13 +183,7 @@ export default function PasswordChallenge() {
             </div>
 
             <div className="timer-section">
-                <div
-                    className={`timer-display ${timeLeft <= 5 ? "danger" : ""}`}>
-                    {timeLeft}
-                </div>
-                <button className="btn-primary" onClick={startTimer}>
-                    {isActive ? "أعد تعيين الوقت" : "ابدأ المؤقت (30 ثانية)"}
-                </button>
+                <Timer time={30} currentPlayer={currentPlayer}></Timer>
             </div>
 
             <div className="action-section">

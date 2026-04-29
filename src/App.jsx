@@ -5,6 +5,7 @@ import Root from "./Root";
 import Home from "./pages/Home";
 import PasswordChallenge from "./pages/passwordChallenge.jsx";
 import BedonKalam from "./pages/BedonKalam.jsx";
+import AnaMeen from "./pages/AnaMeen.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -23,6 +24,10 @@ function App() {
                 {
                     path: "/bedon-kalam",
                     element: <BedonKalam />,
+                },
+                {
+                    path: "/ana-meen",
+                    element: <AnaMeen />,
                 },
             ],
         },

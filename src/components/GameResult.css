@@ -1,0 +1,25 @@
+/* --- نتيجة اللعبة (Game Result) --- */
+.game-result-container {
+    max-width: 80%;
+    margin: 40px auto;
+    min-width: 50%;
+    background: #1a1625;
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid rgba(127, 255, 212, 0.2);
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-result-container h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.game-result-container .playAgain {
+    margin-top: 30px;
+}

@@ -30,3 +30,14 @@ export async function fetchBedonKalam() {
 
     return data;
 }
+
+export async function fetchAnaMeen() {
+    const response = await fetch("http://localhost:8080/anaMeen");
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch change player");
+    }
+
+    return data;
+}

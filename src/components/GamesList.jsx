@@ -20,11 +20,12 @@ export default function GamesList() {
             image: "/bedonKalam.png",
             urlText: "bedon-kalam",
         },
-        // {
-        //     id: 3,
-        //     title: "أنا مين",
-        //     image: "/game3.png",
-        // },
+        {
+            id: 3,
+            title: "أنا مين",
+            image: "/anameen.png",
+            urlText: "ana-meen",
+        },
     ];
 
     return (

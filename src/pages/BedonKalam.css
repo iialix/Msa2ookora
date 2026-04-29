@@ -1,5 +1,5 @@
 /* --- الحاوية الأساسية (Main Container) --- */
-.game-container {
+.bedon-game-container {
     max-width: 80%;
     margin: 40px auto;
     min-width: 50%;
@@ -30,12 +30,12 @@
     margin-bottom: 30px;
 }
 
-.player-section {
-    grid-area: player;
-}
-
 .timer-section {
     grid-area: timer;
+}
+
+.player-section {
+    grid-area: player;
 }
 
 .action-section {
@@ -46,7 +46,7 @@
 
 /* --- وضع الديسكطوب (Desktop Mode) --- */
 @media (min-width: 768px) {
-    .game-container {
+    .bedon-game-container {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
             "player header"
@@ -61,106 +61,6 @@
 }
 
 /* --- لوحة النتائج (Scoreboard) --- */
-.scoreboard {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    font-family: "Cairo", sans-serif;
-}
-
-.score-box2 {
-    width: 130px;
-    height: 130px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-    position: relative;
-    border: 2px solid transparent;
-}
-
-@media (max-width: 375px) {
-    .score-box2 {
-        width: 120px;
-        height: 120px;
-    }
-}
-@media (max-width: 320px) {
-    .score-box2 {
-        width: 100px;
-        height: 100px;
-    }
-}
-
-.score-box2 span {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.score-box2 strong {
-    font-size: 3rem;
-    font-weight: bold;
-    line-height: 1;
-    color: #ffffff;
-}
-
-.score-box2 {
-    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
-    border-color: rgba(255, 255, 255, 0.05);
-}
-
-.score-box2.teamA {
-    order: 1;
-}
-.score-box2.teamB {
-    order: 3;
-}
-
-/* الفريق 1 (البنفسجي) */
-.score-box2.teamA.active {
-    background: rgba(108, 92, 231, 0.1);
-    border-color: #6c5ce7;
-    box-shadow:
-        0 0 15px rgba(108, 92, 231, 0.5),
-        inset 0 0 10px rgba(108, 92, 231, 0.3);
-    order: 1;
-}
-.score-box2.teamA.active span {
-    color: #a29bfe;
-}
-
-/* الفريق 2 (الأكوامارين) */
-.score-box2.teamB.active {
-    background: rgba(127, 255, 212, 0.1);
-    border-color: #7fffd4;
-    box-shadow:
-        0 0 15px rgba(127, 255, 212, 0.4),
-        inset 0 0 10px rgba(127, 255, 212, 0.2);
-    order: 3;
-}
-.score-box2.teamB.active span {
-    color: #7fffd4;
-}
-.scoreboard::before {
-    content: "ضد";
-    color: #757575;
-    font-size: 1.2rem;
-    font-weight: 600;
-    order: 2;
-}
-
-.round-badge {
-    background: #7fffd4;
-    color: #000;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    order: 1;
-}
 
 /* --- صورة اللاعب --- */
 .player-img {
@@ -170,42 +70,6 @@
     border: 3px solid #7fffd4;
     box-shadow: 0 0 20px rgba(127, 255, 212, 0.3);
     object-fit: cover;
-}
-
-/* --- المؤقت (Timer) --- */
-.timer-display {
-    font-size: 5rem;
-    font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 50px;
-    color: aquamarine;
-    text-shadow: 0 0 15px rgba(127, 255, 212, 0.6);
-    letter-spacing: 2px;
-}
-
-@media (min-width: 768px) {
-    .timer-display {
-        font-size: 4rem;
-        margin-top: 0;
-    }
-}
-
-.timer-display.danger {
-    color: #ff4757;
-    text-shadow: 0 0 15px rgba(234, 55, 55, 0.6);
-    animation: pulse 0.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
 }
 
 /* --- الأزرار (Buttons) --- */
@@ -378,84 +242,4 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* --- نتيجة اللعبة (Game Result) --- */
-.game-result-container {
-    max-width: 80%;
-    margin: 40px auto;
-    min-width: 50%;
-    background: #1a1625;
-    padding: 30px;
-    border-radius: 24px;
-    border: 1px solid rgba(127, 255, 212, 0.2);
-    text-align: center;
-    color: white;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.game-result-container h2 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.game-result-container .playAgain {
-    margin-top: 30px;
-}
-
 /* --- نافذة الفوز المبكر (Early Win Popup) --- */
-.popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    backdrop-filter: blur(4px);
-}
-
-.popup-box {
-    background: #1a1625;
-    border: 1px solid rgba(127, 255, 212, 0.4);
-    border-radius: 20px;
-    padding: 40px 30px;
-    text-align: center;
-    max-width: 420px;
-    width: 75%;
-    box-shadow:
-        0 0 40px rgba(127, 255, 212, 0.2),
-        0 20px 50px rgba(0, 0, 0, 0.6);
-    animation: popIn 0.3s ease;
-}
-
-@keyframes popIn {
-    from {
-        transform: scale(0.85);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.popup-box h2 {
-    font-size: 1.5rem;
-    color: #7fffd4;
-    margin-bottom: 12px;
-}
-
-.popup-box p {
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 28px;
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.popup-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}

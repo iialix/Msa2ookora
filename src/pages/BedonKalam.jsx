@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import "./BedonKalam.css";
+
 import { fetchBedonKalam } from "../util/http";
+
+import Timer from "../components/Timer";
+import ScoreBoard from "../components/ScoreBoard";
+import EarlyWin from "../components/EarlyWin";
+import GameResult from "../components/GameResult";
+import "./BedonKalam.css";
 
 const formatImageUrl = (url) => url.replace(".", "backend");
 
@@ -10,8 +16,8 @@ export default function BedonKalam() {
     const [selectedTeam, setSelectedTeam] = useState(1);
     const [usedIndexes, setUsedIndexes] = useState([]); // already chosen buttons
     const [currentPlayer, setCurrentPlayer] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(45);
-    const [isActive, setIsActive] = useState(false);
+    // const [timeLeft, setTimeLeft] = useState(45);
+    // const [isActive, setIsActive] = useState(false);
     const [round, setRound] = useState(1);
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
     const [gameResult, setGameResult] = useState(null);
@@ -22,18 +28,10 @@ export default function BedonKalam() {
     const { data, isPending, isError } = useQuery({
         queryKey: ["bedonKalam"],
         queryFn: fetchBedonKalam,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     });
-
-    // Timer
-    useEffect(() => {
-        let interval = null;
-        if (isActive && timeLeft > 0) {
-            interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-        } else if (timeLeft === 0) {
-            setIsActive(false);
-        }
-        return () => clearInterval(interval);
-    }, [isActive, timeLeft]);
 
     const handleSelectPlayer = (index) => {
         const alreadyUsed = usedIndexes.some(
@@ -43,22 +41,9 @@ export default function BedonKalam() {
         if (alreadyUsed) return;
         setSelectedIndex(index);
         setCurrentPlayer(data[index]);
-        resetTurn();
     };
 
-    const startTimer = () => {
-        if (!isActive) {
-            setTimeLeft(45);
-            setIsActive(true);
-        } else {
-            resetTurn();
-        }
-    };
-
-    const resetTurn = () => {
-        setIsActive(false);
-        setTimeLeft(45);
-    };
+    const handleNewGame = () => window.location.reload();
 
     const addPoint = (team) => {
         if (selectedIndex === null) return;
@@ -85,7 +70,7 @@ export default function BedonKalam() {
         ]);
         setSelectedIndex(null);
         setCurrentPlayer(null);
-        resetTurn();
+        // resetTurn();
 
         // 4. فحص الفوز المبكر (Early Win)
         // المعادلة: إذا وصل فريق لأكثر من نصف الجولات المتبقية "الممكنة"
@@ -141,8 +126,6 @@ export default function BedonKalam() {
         }
     };
 
-    const handleNewGame = () => window.location.reload();
-
     if (isPending)
         return (
             <div className="game-container" dir="rtl">
@@ -158,74 +141,29 @@ export default function BedonKalam() {
 
     if (gameResult) {
         return (
-            <div className="game-result-container" dir="rtl">
-                <div className="game-result">
-                    <h2>{gameResult}</h2>
-                    <div className="scoreboard">
-                        <div className="score-box teamA active">
-                            <span>الفريق 1</span>
-                            <strong>{scores.teamA}</strong>
-                        </div>
-                        <div className="score-box teamB active">
-                            <span>الفريق 2</span>
-                            <strong>{scores.teamB}</strong>
-                        </div>
-                    </div>
-                    <button
-                        className="btn-primary playAgain"
-                        onClick={handleNewGame}>
-                        العب مجدداً
-                    </button>
-                </div>
-            </div>
+            <GameResult
+                gameResult={gameResult}
+                scores={scores}
+                handleNewGame={handleNewGame}></GameResult>
         );
     }
 
     return (
-        <div className="game-container" dir="rtl">
+        <div className="bedon-game-container" dir="rtl">
             {/* Early Win Popup */}
-            {earlyWin && (
-                <div className="popup-overlay">
-                    <div className="popup-box">
-                        <h2>🏆</h2>
-                        <h2>
-                            {earlyWin} فاز ووصل إلى{" "}
-                            {Math.max(scores.teamA, scores.teamB)} نقاط!
-                        </h2>
-                        <p>
-                            هل تريدون الاستمرار في نفس اللعبة أم البدء من جديد؟
-                        </p>
-                        <div className="popup-buttons">
-                            <button
-                                className="btn-primary"
-                                onClick={handleContinue}>
-                                استمر في اللعب
-                            </button>
-                            <button
-                                className="btn-secondary"
-                                onClick={handleNewGame}>
-                                لعبة جديدة
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <EarlyWin
+                earlyWin={earlyWin}
+                scores={scores}
+                handleContinue={handleContinue}></EarlyWin>
 
             {/* Header */}
             <div className="game-header">
-                <span className="round-badge">الجولة: {round} / 10</span>
-                <div className="scoreboard">
-                    <div
-                        className={`score-box2 teamA ${selectedTeam === 1 ? "active" : ""}`}>
-                        <span>الفريق 1</span>
-                        <strong>{scores.teamA}</strong>
-                    </div>
-                    <div
-                        className={`score-box2 teamB ${selectedTeam === 2 ? "active" : ""}`}>
-                        <span>الفريق 2</span>
-                        <strong>{scores.teamB}</strong>
-                    </div>
-                </div>
+                <ScoreBoard
+                    isTurns={true}
+                    selectedTeam={selectedTeam}
+                    round={round}
+                    scores={scores}
+                    totalRounds={10}></ScoreBoard>
             </div>
 
             {/* Player Buttons Grid */}
@@ -282,16 +220,7 @@ export default function BedonKalam() {
 
             {/* Timer */}
             <div className="timer-section">
-                <div
-                    className={`timer-display ${timeLeft <= 5 ? "danger" : ""}`}>
-                    {timeLeft}
-                </div>
-                <button
-                    className="btn-primary"
-                    onClick={startTimer}
-                    disabled={!currentPlayer}>
-                    {isActive ? "أعد تعيين الوقت" : "ابدأ المؤقت (45 ثانية)"}
-                </button>
+                <Timer time={45} currentPlayer={currentPlayer}></Timer>
             </div>
 
             {/* Give Point */}

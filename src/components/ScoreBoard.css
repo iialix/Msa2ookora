@@ -1,0 +1,100 @@
+.scoreboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-family: "Cairo", sans-serif;
+}
+
+.score-box2 {
+    width: 130px;
+    height: 130px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+@media (max-width: 375px) {
+    .score-box2 {
+        width: 120px;
+        height: 120px;
+    }
+}
+@media (max-width: 320px) {
+    .score-box2 {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+.score-box2 span {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.score-box2 strong {
+    font-size: 3rem;
+    font-weight: bold;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.score-box2 {
+    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.score-box2.teamA {
+    order: 1;
+}
+.score-box2.teamB {
+    order: 3;
+}
+
+/* الفريق 1 (البنفسجي) */
+.score-box2.teamA.active {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: #6c5ce7;
+    box-shadow:
+        0 0 15px rgba(108, 92, 231, 0.5),
+        inset 0 0 10px rgba(108, 92, 231, 0.3);
+    order: 1;
+}
+.score-box2.teamA.active span {
+    color: #a29bfe;
+}
+
+/* الفريق 2 (الأكوامارين) */
+.score-box2.teamB.active {
+    background: rgba(127, 255, 212, 0.1);
+    border-color: #7fffd4;
+    box-shadow:
+        0 0 15px rgba(127, 255, 212, 0.4),
+        inset 0 0 10px rgba(127, 255, 212, 0.2);
+    order: 3;
+}
+.score-box2.teamB.active span {
+    color: #7fffd4;
+}
+.scoreboard::before {
+    content: "ضد";
+    color: #757575;
+    font-size: 1.2rem;
+    font-weight: 600;
+    order: 2;
+}
+
+.round-badge {
+    background: #7fffd4;
+    color: #000;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    order: 1;
+}
