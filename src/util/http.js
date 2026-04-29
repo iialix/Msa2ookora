@@ -41,3 +41,12 @@ export async function fetchAnaMeen() {
 
     return data;
 }
+
+export async function fetchOffside() {
+    const response = await fetch("http://localhost:8080/offside");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch change player");
+    }
+    return data;
+}

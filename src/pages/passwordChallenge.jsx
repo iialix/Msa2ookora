@@ -23,6 +23,8 @@ export default function PasswordChallenge() {
     // ✅ NEW: early win popup state
     const [earlyWin, setEarlyWin] = useState(null); // null | "الفريق 1" | "الفريق 2"
 
+    const [continued, setContinued] = useState(false);
+
     const { data, isPending, isError } = useQuery({
         queryKey: ["passwordPlayers"],
         queryFn: fetchPasswordPlayers,
@@ -53,7 +55,7 @@ export default function PasswordChallenge() {
         setScores(newScores);
 
         // ✅ NEW: Check if a team reached 5 points — show popup before continuing
-        if (newScores[team] >= 5 && !earlyWin) {
+        if (newScores[team] >= 5 && !continued) {
             const winnerName = team === "teamA" ? "الفريق 1" : "الفريق 2";
             setEarlyWin(winnerName);
             return; // stop here, don't advance round yet
@@ -97,6 +99,7 @@ export default function PasswordChallenge() {
 
     // ✅ NEW: Continue the same game (dismiss popup, advance round normally)
     const handleContinue = () => {
+        setContinued(true);
         setEarlyWin(null);
         nextRound(scores);
     };
