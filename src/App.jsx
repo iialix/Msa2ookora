@@ -7,6 +7,7 @@ import PasswordChallenge from "./pages/passwordChallenge.jsx";
 import BedonKalam from "./pages/BedonKalam.jsx";
 import AnaMeen from "./pages/AnaMeen.jsx";
 import Offside from "./pages/Offside.jsx";
+import Bank from "./pages/Bank.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -33,6 +34,10 @@ function App() {
                 {
                     path: "/offside",
                     element: <Offside />,
+                },
+                {
+                    path: "/bank",
+                    element: <Bank />,
                 },
             ],
         },

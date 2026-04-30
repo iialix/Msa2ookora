@@ -1,13 +1,27 @@
+/* === TIMER DISPLAY === */
 .timer-display {
     font-size: 5rem;
     font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 50px;
+    margin: 30px 0 50px;
+
     color: aquamarine;
-    text-shadow: 0 0 15px rgba(127, 255, 212, 0.6);
-    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(127, 255, 212, 0.8);
+
+    letter-spacing: 3px;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(127, 255, 212, 0.2);
+    border-radius: 20px;
+
+    padding: 20px 40px;
+
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(127, 255, 212, 0.1);
+
+    transition: all 0.2s ease;
 }
 
+/* Responsive */
 @media (min-width: 768px) {
     .timer-display {
         font-size: 4rem;
@@ -15,10 +29,16 @@
     }
 }
 
+/* === DANGER MODE === */
 .timer-display.danger {
+    background: rgba(255, 0, 0, 0.03);
     color: #ff4757;
-    text-shadow: 0 0 15px rgba(234, 55, 55, 0.6);
-    animation: pulse 0.5s infinite;
+    text-shadow: 0 0 25px rgba(255, 71, 87, 0.9);
+    border: 1px solid rgba(255, 71, 87, 0.4);
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.1);
+    animation:
+        pulse 0.6s infinite,
+        shake 0.4s infinite;
 }
 
 @keyframes pulse {
@@ -26,9 +46,119 @@
         transform: scale(1);
     }
     50% {
-        transform: scale(1.05);
+        transform: scale(1.08);
     }
     100% {
         transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    50% {
+        transform: translateX(2px);
+    }
+    75% {
+        transform: translateX(-2px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* === BUTTONS CONTAINER === */
+.timer-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* === MAIN BUTTON STYLE === */
+.btn-primary {
+    background: linear-gradient(135deg, #00c9a7, #00ffa3);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+
+    font-size: 1rem;
+    font-weight: bold;
+    color: #111;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    box-shadow: 0 5px 15px rgba(0, 255, 163, 0.3);
+}
+
+/* Hover / click effects */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 255, 163, 0.5);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+/* Disabled */
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* === CONTROL BUTTONS (icons) === */
+.timer-buttons .controls {
+    font-size: 1.6rem;
+    padding: 12px 16px;
+    min-width: 60px;
+}
+
+/* === TOAST ALERT === */
+.toast-alert {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+
+    background: #ff4757;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 14px 22px;
+    border-radius: 12px;
+
+    box-shadow: 0 4px 20px rgba(255, 71, 87, 0.5);
+    animation:
+        slideInToast 0.3s ease,
+        fadeOutToast 0.4s ease 2.6s forwards;
+
+    z-index: 9999;
+    pointer-events: none;
+}
+
+@keyframes slideInToast {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOutToast {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
     }
 }

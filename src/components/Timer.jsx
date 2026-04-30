@@ -1,57 +1,83 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Timer.css";
 
-export default function Timer({ time, currentPlayer, reset }) {
+export default function Timer({ time, currentPlayer, reset, onEnd }) {
     const [timeLeft, setTimeLeft] = useState(time);
     const [isActive, setIsActive] = useState(false);
+    const intervalRef = useRef(null);
+    const [showToast, setShowToast] = useState(false);
 
+    // Reset timer
     useEffect(() => {
         setTimeLeft(time);
         setIsActive(false);
     }, [currentPlayer, time, reset]);
 
+    // Start / stop interval
     useEffect(() => {
         if (!isActive) return;
 
-        const interval = setInterval(() => {
-            setTimeLeft((t) => {
-                if (t <= 1) {
-                    clearInterval(interval);
-                    setIsActive(false);
-                    return 0;
-                }
-                return t - 1;
-            });
+        intervalRef.current = setInterval(() => {
+            setTimeLeft((t) => t - 1);
         }, 1000);
 
-        return () => clearInterval(interval);
+        return () => clearInterval(intervalRef.current);
     }, [isActive]);
 
-    const startTimer = () => {
-        if (!isActive) {
-            setTimeLeft(time);
-            setIsActive(true);
-        } else {
-            resetTurn();
-        }
-    };
+    // Handle end safely here
+    useEffect(() => {
+        if (timeLeft === 0) {
+            setIsActive(false);
+            clearInterval(intervalRef.current);
 
-    const resetTurn = () => {
-        setIsActive(false);
-        setTimeLeft(time);
-    };
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+
+            const timeout = setTimeout(() => {
+                onEnd?.();
+            }, 0);
+
+            setTimeLeft(time);
+            return () => clearTimeout(timeout);
+        }
+    }, [timeLeft, onEnd]);
 
     return (
-        <>
+        <div>
             <div className={`timer-display ${timeLeft <= 5 ? "danger" : ""}`}>
                 {timeLeft}
             </div>
-            <button
-                className="btn-primary"
-                onClick={startTimer}
-                disabled={!currentPlayer}>
-                {isActive ? "أعد تعيين الوقت" : `ابدأ المؤقت (${time} ثانية)`}
-            </button>
-        </>
+
+            <div className="timer-buttons">
+                {!isActive ? (
+                    <button
+                        className="btn-primary"
+                        onClick={() => setIsActive(true)}
+                        disabled={!currentPlayer}>
+                        ▶ ابدأ ({timeLeft}s)
+                    </button>
+                ) : (
+                    <>
+                        <button
+                            className="btn-primary controls"
+                            onClick={() => setIsActive(false)}
+                            disabled={!currentPlayer}>
+                            ⏸
+                        </button>
+
+                        <button
+                            className="btn-primary controls"
+                            onClick={() => {
+                                setIsActive(false);
+                                setTimeLeft(time);
+                            }}
+                            disabled={!currentPlayer}>
+                            ↺
+                        </button>
+                    </>
+                )}
+            </div>
+            {showToast && <div className="toast-alert">⏰ انتهى الوقت</div>}
+        </div>
     );
 }

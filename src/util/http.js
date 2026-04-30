@@ -50,3 +50,12 @@ export async function fetchOffside() {
     }
     return data;
 }
+
+export async function fetchBank() {
+    const response = await fetch("http://localhost:8080/bank");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch change player");
+    }
+    return data;
+}

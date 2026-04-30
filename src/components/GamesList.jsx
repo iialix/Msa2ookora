@@ -32,6 +32,12 @@ export default function GamesList() {
             image: "/offside.png",
             urlText: "offside",
         },
+        {
+            id: 5,
+            title: "بنك",
+            image: "/bank.png",
+            urlText: "bank",
+        },
     ];
 
     return (
