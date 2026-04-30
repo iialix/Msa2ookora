@@ -106,8 +106,6 @@
     padding: 20px;
     flex-wrap: wrap;
 }
-
-.streak-display,
 .counter-display {
     display: flex;
     flex-direction: column;
@@ -115,19 +113,12 @@
     gap: 4px;
 }
 
-.streak-label,
+.counter-label,
 .counter-label {
     font-size: 0.78rem;
     color: rgba(255, 255, 255, 0.45);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-}
-
-.streak-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #f5c518;
-    line-height: 1;
 }
 
 .counter-value {

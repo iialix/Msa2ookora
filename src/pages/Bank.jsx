@@ -220,10 +220,6 @@ export default function Bank() {
 
             {/* ── Counter + Bank ── */}
             <div className="bank-counter-section">
-                <div className="streak-display">
-                    <span className="streak-label">التتالي</span>
-                    <span className="streak-value">{streak}</span>
-                </div>
                 <div className="counter-display">
                     <span className="counter-label">النقاط المعلقة</span>
                     <span className="counter-value">{counter}</span>
