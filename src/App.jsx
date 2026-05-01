@@ -8,6 +8,7 @@ import BedonKalam from "./pages/BedonKalam.jsx";
 import AnaMeen from "./pages/AnaMeen.jsx";
 import Offside from "./pages/Offside.jsx";
 import Bank from "./pages/Bank.jsx";
+import TopTen from "./pages/TopTen.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -38,6 +39,10 @@ function App() {
                 {
                     path: "/bank",
                     element: <Bank />,
+                },
+                {
+                    path: "/top10",
+                    element: <TopTen />,
                 },
             ],
         },

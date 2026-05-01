@@ -38,6 +38,12 @@ export default function GamesList() {
             image: "/bank.png",
             urlText: "bank",
         },
+        {
+            id: 6,
+            title: "Top 10",
+            image: "/top10.png",
+            urlText: "top10",
+        },
     ];
 
     return (

@@ -59,3 +59,12 @@ export async function fetchBank() {
     }
     return data;
 }
+
+export async function fetchTopTen() {
+    const response = await fetch("http://localhost:8080/topTen");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch top 10 players");
+    }
+    return data;
+}
