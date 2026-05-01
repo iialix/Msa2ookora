@@ -7,7 +7,7 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 
-const formatImageUrl = (url) => url.replace(".", "backend");
+const formatImageUrl = (url) => url.replace(".", "../../backend");
 
 export default function PasswordChallenge() {
     const [timeLeft, setTimeLeft] = useState(30);
@@ -87,10 +87,9 @@ export default function PasswordChallenge() {
                 setGameResult("انتهت اللعبة بالتعادل!");
             } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${
-                        currentScores.teamA > currentScores.teamB
-                            ? "الفريق 1"
-                            : "الفريق 2"
+                    `انتهت اللعبة! الفائز هو: ${currentScores.teamA > currentScores.teamB
+                        ? "الفريق 1"
+                        : "الفريق 2"
                     }`,
                 );
             }

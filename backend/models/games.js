@@ -13,13 +13,13 @@ class Player {
         return data;
     }
 
-static async getPlayers(number) {
-    const { data, error } = await supabase
-        .rpc('get_random_players', { limit_count: number });
+    static async getPlayers(number) {
+        const { data, error } = await supabase
+            .rpc('get_random_players', { limit_count: number });
 
-    if (error) throw error;
-    return data;
-}
+        if (error) throw error;
+        return data;
+    }
 }
 
 class AnaMeen {
@@ -33,8 +33,8 @@ class AnaMeen {
     }
 
     static async getAnaMeen() {
-    const { data, error } = await supabase
-        .rpc('get_random_ana_meen', { limit_count: 3 });
+        const { data, error } = await supabase
+            .rpc('get_random_ana_meen', { limit_count: 3 });
 
         if (error) throw error;
         if (!data) return [];
@@ -53,7 +53,7 @@ class AnaMeen {
 
         const { data: players, error: playerError } = await supabase
             .from('players')
-            .select('id, name') 
+            .select('id, name')
             .in('id', ids);
 
         if (playerError) throw playerError;
@@ -87,8 +87,8 @@ class TopTen {
     }
 
     static async getTopTen() {
-    const { data, error } = await supabase
-        .rpc('get_random_top_ten', { limit_count: 3 });
+        const { data, error } = await supabase
+            .rpc('get_random_top_ten', { limit_count: 3 });
 
         if (error) throw error;
         if (!data) return [];
@@ -104,8 +104,8 @@ class Bank {
     }
 
     static async getBankQuestions() {
-    const { data, error } = await supabase
-        .rpc('get_random_bank', { limit_count: 72 });
+        const { data, error } = await supabase
+            .rpc('get_random_bank', { limit_count: 72 });
 
         if (error) throw error;
         if (!data) return [];
@@ -121,9 +121,9 @@ class Offside {
     }
 
     static async getOffsideQuestions() {
-    const { data, error } = await supabase
-        .rpc('get_random_offside', { limit_count: 10 });
-        
+        const { data, error } = await supabase
+            .rpc('get_random_offside', { limit_count: 10 });
+
         if (error) throw error;
         if (!data) return [];
 
@@ -131,4 +131,21 @@ class Offside {
     }
 }
 
-module.exports = { Player, AnaMeen, TopTen, Bank, Offside };
+class FiveXTen {
+    constructor(question) {
+        this.question = question;
+    }
+
+    static async getFiveXTenQuestions() {
+        const { data, error } = await supabase
+            .rpc('get_random_5x10', { limit_count: 8 });
+
+        if (error) throw error;
+        if (!data) return [];
+
+        return data;
+    }
+}
+
+
+module.exports = { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen };

@@ -1,4 +1,4 @@
-const { Player, AnaMeen, TopTen, Bank, Offside } = require('../models/games.js');
+const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen } = require('../models/games.js');
 
 exports.getPasswordPlayers = async (req, res) => {
     try {
@@ -66,6 +66,16 @@ exports.getBankQuestions = async (req, res) => {
 exports.getOffsideQuestions = async (req, res) => {
     try {
         const questions = await Offside.getOffsideQuestions();
+        res.status(200).json(questions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch questions' });
+        console.log(error);
+    }
+};
+
+exports.getFiveXTenQuestions = async (req, res) => {
+    try {
+        const questions = await Offside.getFiveXTenQuestions();
         res.status(200).json(questions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch questions' });
