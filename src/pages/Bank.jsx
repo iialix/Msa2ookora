@@ -8,11 +8,8 @@ import "./Bank.css";
 
 const QUESTIONS_PER_ROUND = 12;
 const ROUNDS_PER_TEAM = 3;
-const TOTAL_ROUNDS = ROUNDS_PER_TEAM * 2; // 6 rounds alternating teams
+const TOTAL_ROUNDS = ROUNDS_PER_TEAM * 2;
 
-// Scoring: streak 1→1, 2→4, 3→8, 4→16, 5→32 ...
-// streak=1: 1, streak>=2: 2^(streak-1) * 2  => actually: 1,4,8,16,32
-// Pattern: idx=1→1, idx>=2→ 2^idx
 function streakToPoints(streak) {
     if (streak <= 0) return 0;
     if (streak === 1) return 1;
@@ -20,7 +17,6 @@ function streakToPoints(streak) {
 }
 
 export default function Bank() {
-    // round: 0-5 (6 total: team1 r1, team2 r1, team1 r2, team2 r2, team1 r3, team2 r3)
     const [round, setRound] = useState(0);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [streak, setStreak] = useState(0); // consecutive correct answers
@@ -28,7 +24,7 @@ export default function Bank() {
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
     const [gameResult, setGameResult] = useState(null);
     const [timerKey, setTimerKey] = useState(0); // force Timer remount to reset
-    const [roundSummary, setRoundSummary] = useState(null); // show brief summary between rounds
+    const [roundSummary, setRoundSummary] = useState(null);
     const [roundEnded, setRoundEnded] = useState(false); // timer ran out — waiting for manual end
 
     const { data, isPending, isError } = useQuery({
@@ -41,7 +37,6 @@ export default function Bank() {
 
     const handleNewGame = () => window.location.reload();
 
-    // Which team is playing this round? Alternates: 0,2,4 → team1 ; 1,3,5 → team2
     const activeTeam = round % 2 === 0 ? "teamA" : "teamB";
     const activeTeamLabel = activeTeam === "teamA" ? "الفريق 1" : "الفريق 2";
     const teamRound = Math.floor(round / 2) + 1; // which of the 3 rounds for this team
@@ -49,9 +44,9 @@ export default function Bank() {
     // Slice the 12 questions for this round from fetched data
     const roundQuestions = data
         ? data.slice(
-              round * QUESTIONS_PER_ROUND,
-              (round + 1) * QUESTIONS_PER_ROUND,
-          )
+            round * QUESTIONS_PER_ROUND,
+            (round + 1) * QUESTIONS_PER_ROUND,
+        )
         : [];
     const currentQuestion = roundQuestions[questionIndex] || null;
 

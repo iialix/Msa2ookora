@@ -16,8 +16,6 @@ export default function BedonKalam() {
     const [selectedTeam, setSelectedTeam] = useState(1);
     const [usedIndexes, setUsedIndexes] = useState([]); // already chosen buttons
     const [currentPlayer, setCurrentPlayer] = useState(null);
-    // const [timeLeft, setTimeLeft] = useState(45);
-    // const [isActive, setIsActive] = useState(false);
     const [round, setRound] = useState(1);
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
     const [gameResult, setGameResult] = useState(null);
@@ -63,7 +61,6 @@ export default function BedonKalam() {
             setScores(currentScores);
         }
 
-        // 3. تسجيل البيانات وتصفير الجولة
         setUsedIndexes((prev) => [
             ...prev,
             { selectedIndex: selectedIndex, teamAnswer: team },
@@ -72,8 +69,6 @@ export default function BedonKalam() {
         setCurrentPlayer(null);
         // resetTurn();
 
-        // 4. فحص الفوز المبكر (Early Win)
-        // المعادلة: إذا وصل فريق لأكثر من نصف الجولات المتبقية "الممكنة"
         if (!continued) {
             const totalRounds = 10;
             const roundsPlayed = round;
@@ -95,7 +90,6 @@ export default function BedonKalam() {
             }
         }
 
-        // 5. فحص نهاية اللعبة (الجولة 10)
         if (round >= 10) {
             if (currentScores.teamA === currentScores.teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");

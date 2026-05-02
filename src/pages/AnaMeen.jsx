@@ -29,11 +29,9 @@ export default function AnaMeen() {
     const [reset, setReset] = useState(1);
     const [earlyWin, setEarlyWin] = useState(false);
 
-    // Track which clue index each team answered wrong on (-1 = never)
-    // A team is disabled on wrongClue and wrongClue+1, free from wrongClue+2 onward
+
     const [wrongOnClue, setWrongOnClue] = useState({ teamA: -1, teamB: -1 });
 
-    // Penalty timers (seconds remaining)
     const [penalties, setPenalties] = useState({ teamA: 0, teamB: 0 });
 
     const { data, isPending, isError } = useQuery({

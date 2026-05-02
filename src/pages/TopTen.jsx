@@ -22,12 +22,12 @@ function isMatch(guess, answer) {
 }
 
 export default function TopTen() {
-    const [round, setRound] = useState(0); // 0-based index into data
-    const [activeTeam, setActiveTeam] = useState(1); // 1 or 2
-    const [scores, setScores] = useState({ teamA: 0, teamB: 0 }); // within current round
-    const [totalWins, setTotalWins] = useState({ teamA: 0, teamB: 0 }); // rounds won
+    const [round, setRound] = useState(0);
+    const [activeTeam, setActiveTeam] = useState(1);
+    const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
+    const [totalWins, setTotalWins] = useState({ teamA: 0, teamB: 0 });
     const [revealed, setRevealed] = useState(Array(10).fill(false));
-    const [revealedBy, setRevealedBy] = useState(Array(10).fill(null)); // 1 or 2
+    const [revealedBy, setRevealedBy] = useState(Array(10).fill(null));
     const [guess, setGuess] = useState("");
     const [wrongFlash, setWrongFlash] = useState(false);
     const [timerKey, setTimerKey] = useState(0);
@@ -49,7 +49,6 @@ export default function TopTen() {
     const currentQuestion = data?.[round] || null;
     const answers = currentQuestion ? getAnswers(currentQuestion) : [];
 
-    // Points for answer at index i = i + 1
     const pointsFor = (i) => i + 1;
 
     const handleGuessSubmit = (e) => {
@@ -69,7 +68,7 @@ export default function TopTen() {
                 const scoringTeam = activeTeam === 1 ? "teamA" : "teamB";
                 newScores[scoringTeam] = (newScores[scoringTeam] || 0) + pts;
                 matched = true;
-                break; // only match one at a time
+                break;
             }
         }
 
@@ -118,7 +117,6 @@ export default function TopTen() {
             newWins.teamB += 1;
             roundWinner = "الفريق 2";
         }
-        // tie: no win awarded
 
         setTotalWins(newWins);
 

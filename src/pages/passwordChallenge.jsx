@@ -20,8 +20,7 @@ export default function PasswordChallenge() {
         image: null,
     });
     const [gameResult, setGameResult] = useState(null);
-    // ✅ NEW: early win popup state
-    const [earlyWin, setEarlyWin] = useState(null); // null | "الفريق 1" | "الفريق 2"
+    const [earlyWin, setEarlyWin] = useState(null);
 
     const [continued, setContinued] = useState(false);
 
@@ -54,11 +53,10 @@ export default function PasswordChallenge() {
         const newScores = { ...scores, [team]: scores[team] + 1 };
         setScores(newScores);
 
-        // ✅ NEW: Check if a team reached 5 points — show popup before continuing
         if (newScores[team] >= 5 && !continued) {
             const winnerName = team === "teamA" ? "الفريق 1" : "الفريق 2";
             setEarlyWin(winnerName);
-            return; // stop here, don't advance round yet
+            return;
         }
 
         nextRound(newScores);
@@ -87,24 +85,21 @@ export default function PasswordChallenge() {
                 setGameResult("انتهت اللعبة بالتعادل!");
             } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${
-                        currentScores.teamA > currentScores.teamB
-                            ? "الفريق 1"
-                            : "الفريق 2"
+                    `انتهت اللعبة! الفائز هو: ${currentScores.teamA > currentScores.teamB
+                        ? "الفريق 1"
+                        : "الفريق 2"
                     }`,
                 );
             }
         }
     };
 
-    // ✅ NEW: Continue the same game (dismiss popup, advance round normally)
     const handleContinue = () => {
         setContinued(true);
         setEarlyWin(null);
         nextRound(scores);
     };
 
-    // ✅ NEW: Start a brand new game
     const handleNewGame = () => {
         window.location.reload();
     };

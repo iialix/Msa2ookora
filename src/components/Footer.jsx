@@ -7,7 +7,6 @@ const Footer = () => {
         <footer className="main-footer" dir="rtl">
             <div className="footer-glow-line" />
             <div className="footer-container">
-                {/* القسم الأول: العلامة التجارية */}
                 <div className="footer-brand">
                     <h2 className="footer-logo">
                         ألعاب<span>ـنا</span>
@@ -29,7 +28,6 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* القسم الثاني: روابط سريعة */}
                 <div className="footer-links">
                     <h3>روابط سريعة</h3>
                     <ul>
@@ -48,7 +46,6 @@ const Footer = () => {
                     </ul>
                 </div>
 
-                {/* القسم الثالث: الاشتراك */}
                 <div className="footer-newsletter">
                     <h3>اشترك في النشرة</h3>
                     <p>كن أول من يعرف عند إضافة ألعاب جديدة.</p>

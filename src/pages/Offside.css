@@ -1,4 +1,3 @@
-/* --- الحاوية الأساسية --- */
 .offside-game-container {
     max-width: 80%;
     margin: 40px auto;
@@ -76,6 +75,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -144,9 +144,11 @@
 .offside-game-container .btn-team:active {
     transform: scale(0.98);
 }
+
 .offside-game-container .btn-team:hover {
     transform: translateY(-3px);
 }
+
 .offside-game-container .btn-team:disabled {
     opacity: 0.4;
     cursor: not-allowed;

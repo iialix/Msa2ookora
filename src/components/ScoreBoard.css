@@ -1,4 +1,3 @@
-/* --- نتيجة اللعبة (Game Result) --- */
 .game-result-container {
     max-width: 80%;
     margin: 40px auto;
@@ -42,9 +41,10 @@
     align-items: center;
     transition: all 0.3s ease;
     border: 2px solid transparent;
-    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
+    background: rgba(255, 255, 255, 0.03);
     border-color: rgba(255, 255, 255, 0.05);
 }
+
 .score-box.teamB {
     width: 130px;
     height: 130px;
@@ -55,7 +55,7 @@
     align-items: center;
     transition: all 0.3s ease;
     border: 2px solid transparent;
-    background: rgba(255, 255, 255, 0.03); /* خلفية زجاجية خفيفة جداً */
+    background: rgba(255, 255, 255, 0.03);
     border-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -88,6 +88,7 @@
         inset 0 0 10px rgba(108, 92, 231, 0.3);
     order: 1;
 }
+
 .score-box.teamA.active span {
     color: #a29bfe;
 }
@@ -100,6 +101,7 @@
         inset 0 0 10px rgba(127, 255, 212, 0.2);
     order: 3;
 }
+
 .score-box.teamB.active span {
     color: #7fffd4;
 }
