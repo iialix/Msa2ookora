@@ -7,7 +7,7 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 
-const formatImageUrl = (url) => url.replace(".", "backend");
+const formatImageUrl = (url) => url.replace(".", "../../backend");
 
 export default function PasswordChallenge() {
     const [timeLeft, setTimeLeft] = useState(30);

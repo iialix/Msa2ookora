@@ -14,4 +14,7 @@ router.get('/bank', playerController.getBankQuestions);
 
 router.get('/offside', playerController.getOffsideQuestions);
 
+router.get('/fiveXten', playerController.getFiveXTenQuestions);
+
+
 module.exports = router;
