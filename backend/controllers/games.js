@@ -75,7 +75,7 @@ exports.getOffsideQuestions = async (req, res) => {
 
 exports.getFiveXTenQuestions = async (req, res) => {
     try {
-        const questions = await Offside.getFiveXTenQuestions();
+        const questions = await FiveXTen.getFiveXTenQuestions();
         res.status(200).json(questions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch questions' });
