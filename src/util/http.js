@@ -68,3 +68,12 @@ export async function fetchTopTen() {
     }
     return data;
 }
+
+export async function fetchFivexTen() {
+    const response = await fetch("http://localhost:8080/fiveXten");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch 5x10 players");
+    }
+    return data;
+}

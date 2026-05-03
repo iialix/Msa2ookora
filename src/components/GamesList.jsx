@@ -43,6 +43,12 @@ export default function GamesList() {
             image: "/top10.png",
             urlText: "top10",
         },
+        {
+            id: 7,
+            title: "خمسة × عشرة",
+            image: "/fivexten.png",
+            urlText: "fivexten",
+        },
     ];
 
     return (
@@ -50,7 +56,6 @@ export default function GamesList() {
             <h2 className="section-title">الألعاب</h2>
             <div className="games-grid">
                 {gamesData.map((game) => {
-
                     return (
                         <Link
                             to={`/${game.urlText}`}

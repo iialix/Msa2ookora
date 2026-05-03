@@ -9,6 +9,7 @@ import AnaMeen from "./pages/AnaMeen.jsx";
 import Offside from "./pages/Offside.jsx";
 import Bank from "./pages/Bank.jsx";
 import TopTen from "./pages/TopTen.jsx";
+import FivexTen from "./pages/FivexTen.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -43,6 +44,10 @@ function App() {
                 {
                     path: "/top10",
                     element: <TopTen />,
+                },
+                {
+                    path: "/fivexten",
+                    element: <FivexTen />,
                 },
             ],
         },
