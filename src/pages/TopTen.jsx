@@ -4,6 +4,7 @@ import { fetchTopTen } from "../util/http";
 import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
+import EarlyWin from "../components/EarlyWin";
 import "./TopTen.css";
 import { button } from "framer-motion/client";
 
@@ -15,6 +16,12 @@ function getAnswers(q) {
 }
 
 // Partial case-insensitive match — checks if the guess appears anywhere in the answer
+function isMatch(guess, answer) {
+    const g = guess.trim().toLowerCase();
+    const a = answer.toLowerCase();
+    return g.length > 0 && a.includes(g);
+}
+
 export default function TopTen() {
     const [round, setRound] = useState(0);
     const [activeTeam, setActiveTeam] = useState(1);
@@ -28,6 +35,8 @@ export default function TopTen() {
     const [roundSummary, setRoundSummary] = useState(null);
     const [gameResult, setGameResult] = useState(null);
     const [allRevealed, setAllRevealed] = useState(false);
+    const [earlyWin, setEarlyWin] = useState(null);
+    const [continued, setContinued] = useState(false);
     const inputRef = useRef(null);
 
     const { data, isPending, isError } = useQuery({
@@ -55,13 +64,14 @@ export default function TopTen() {
         const newScores = { ...scores };
 
         for (let i = 0; i < answers.length; i++) {
-            if (!newRevealed[i]) {
+            if (!newRevealed[i] && isMatch(guess, answers[i])) {
                 newRevealed[i] = true;
                 newRevealedBy[i] = activeTeam;
                 const pts = pointsFor(i);
                 const scoringTeam = activeTeam === 1 ? "teamA" : "teamB";
                 newScores[scoringTeam] = (newScores[scoringTeam] || 0) + pts;
                 matched = true;
+
                 break;
             }
         }
@@ -70,6 +80,17 @@ export default function TopTen() {
             setRevealed(newRevealed);
             setRevealedBy(newRevealedBy);
             setScores(newScores);
+
+            // Early win check
+            const remainingPoints = newRevealed.reduce(
+                (sum, rev, i) => (rev ? sum : sum + (i + 1)),
+                0,
+            );
+            if (newScores.teamA > newScores.teamB + remainingPoints) {
+                setEarlyWin("الفريق 1");
+            } else if (newScores.teamB > newScores.teamA + remainingPoints) {
+                setEarlyWin("الفريق 2");
+            }
 
             // Check if all answers found
             if (newRevealed.every(Boolean)) {
@@ -87,6 +108,11 @@ export default function TopTen() {
         inputRef.current?.focus();
     };
 
+    const handleContinue = () => {
+        setContinued(true);
+        setEarlyWin(null);
+    };
+
     const handleSkip = () => {
         // Switch team, reset timer
         setActiveTeam((t) => (t === 1 ? 2 : 1));
@@ -95,6 +121,7 @@ export default function TopTen() {
     };
 
     const handleRevealAll = () => {
+        setContinued(true);
         setRevealed(Array(10).fill(true));
         setAllRevealed(true);
     };
@@ -145,6 +172,7 @@ export default function TopTen() {
         setTimerKey((k) => k + 1);
         setRoundSummary(null);
         setAllRevealed(false);
+        setEarlyWin(null);
     };
 
     function handleSwitchTurns() {
@@ -214,6 +242,14 @@ export default function TopTen() {
 
     return (
         <div className="topten-container" dir="rtl">
+            {!continued && (
+                <EarlyWin
+                    earlyWin={earlyWin}
+                    scores={scores}
+                    handleContinue={handleContinue}
+                    handleNewGame={handleRevealAll}
+                />
+            )}
             {/* ── Header ── */}
             <div className="topten-header">
                 <ScoreBoard
