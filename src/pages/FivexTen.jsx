@@ -42,14 +42,25 @@ export default function FivexTen() {
         // 3. Early win check — max possible remaining points = roundsRemaining * 2
         if (!continued && round < 8) {
             const roundsRemaining = 8 - round;
-            const maxLeft = roundsRemaining * 2;
+            let teamARemaining = 0;
+            let teamBRemaining = 0;
+            for (let i = round; i < 8; i++) {
+                if (i % 2 == 1) {
+                    teamBRemaining++;
+                } else if (i % 2 == 0) {
+                    teamARemaining++;
+                }
+            }
+            // const maxLeft = roundsRemaining / 2;
             const { teamA, teamB } = currentScores;
 
-            if (teamA > teamB + maxLeft) {
+            console.log("team a " + teamARemaining, "team b " + teamBRemaining);
+
+            if (teamA > teamBRemaining + teamB) {
                 setEarlyWin("الفريق 1");
                 return;
             }
-            if (teamB > teamA + maxLeft) {
+            if (teamB > teamARemaining + teamA) {
                 setEarlyWin("الفريق 2");
                 return;
             }
@@ -114,6 +125,7 @@ export default function FivexTen() {
                 earlyWin={earlyWin}
                 scores={scores}
                 handleContinue={handleContinue}
+                handleNewGame={handleNewGame}
             />
 
             {/* Header / Scoreboard */}

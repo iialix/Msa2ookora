@@ -15,12 +15,6 @@ function getAnswers(q) {
 }
 
 // Partial case-insensitive match — checks if the guess appears anywhere in the answer
-function isMatch(guess, answer) {
-    const g = guess.trim().toLowerCase();
-    const a = answer.toLowerCase();
-    return g.length > 0 && a.includes(g);
-}
-
 export default function TopTen() {
     const [round, setRound] = useState(0);
     const [activeTeam, setActiveTeam] = useState(1);
@@ -61,7 +55,7 @@ export default function TopTen() {
         const newScores = { ...scores };
 
         for (let i = 0; i < answers.length; i++) {
-            if (!newRevealed[i] && isMatch(guess, answers[i])) {
+            if (!newRevealed[i]) {
                 newRevealed[i] = true;
                 newRevealedBy[i] = activeTeam;
                 const pts = pointsFor(i);

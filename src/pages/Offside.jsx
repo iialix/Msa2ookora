@@ -49,14 +49,25 @@ export default function Offside() {
         // 3. Early win check — max possible remaining points = roundsRemaining * 2
         if (!continued && round < 10) {
             const roundsRemaining = 10 - round;
-            const maxLeft = roundsRemaining * 2;
+            let teamARemaining = 0;
+            let teamBRemaining = 0;
+            for (let i = round; i < 10; i++) {
+                if (i % 2 == 1) {
+                    teamBRemaining++;
+                } else if (i % 2 == 0) {
+                    teamARemaining++;
+                }
+            }
+            // const maxLeft = roundsRemaining / 2;
             const { teamA, teamB } = currentScores;
 
-            if (teamA > teamB + maxLeft) {
+            console.log("team a " + teamARemaining, "team b " + teamBRemaining);
+
+            if (teamA > teamBRemaining * 2 + teamB) {
                 setEarlyWin("الفريق 1");
                 return;
             }
-            if (teamB > teamA + maxLeft) {
+            if (teamB > teamARemaining * 2 + teamA) {
                 setEarlyWin("الفريق 2");
                 return;
             }
@@ -121,6 +132,7 @@ export default function Offside() {
                 earlyWin={earlyWin}
                 scores={scores}
                 handleContinue={handleContinue}
+                handleNewGame={handleNewGame}
             />
 
             {/* Header / Scoreboard */}

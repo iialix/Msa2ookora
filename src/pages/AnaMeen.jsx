@@ -29,7 +29,6 @@ export default function AnaMeen() {
     const [reset, setReset] = useState(1);
     const [earlyWin, setEarlyWin] = useState(false);
 
-
     const [wrongOnClue, setWrongOnClue] = useState({ teamA: -1, teamB: -1 });
 
     const [penalties, setPenalties] = useState({ teamA: 0, teamB: 0 });
