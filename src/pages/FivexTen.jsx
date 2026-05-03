@@ -40,8 +40,8 @@ export default function FivexTen() {
         setSelectedTeam((prev) => (prev === 1 ? 2 : 1));
 
         // 3. Early win check — max possible remaining points = roundsRemaining * 2
-        if (!continued && round < 10) {
-            const roundsRemaining = 10 - round;
+        if (!continued && round < 8) {
+            const roundsRemaining = 8 - round;
             const maxLeft = roundsRemaining * 2;
             const { teamA, teamB } = currentScores;
 
@@ -56,7 +56,7 @@ export default function FivexTen() {
         }
 
         // 4. End or advance
-        if (round >= 10) {
+        if (round >= 8) {
             const { teamA, teamB } = currentScores;
             if (teamA === teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
@@ -72,7 +72,7 @@ export default function FivexTen() {
     const handleContinue = () => {
         setContinued(true);
         setEarlyWin(null);
-        if (round >= 10) {
+        if (round >= 8) {
             const { teamA, teamB } = scores;
             if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
             else
@@ -123,7 +123,7 @@ export default function FivexTen() {
                     selectedTeam={selectedTeam}
                     round={round}
                     scores={scores}
-                    totalRounds={10}
+                    totalRounds={8}
                 />
             </div>
 
