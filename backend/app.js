@@ -3,7 +3,8 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const playerRoutes = require('./routes/games');
-const { testConnection } = require('./util/database');
+const { testConnection: testDatabaseConnection } = require('./util/database');
+const { testConnection: testApiConnection } = require('./util/BSD_API');
 
 const app = express();
 
@@ -22,17 +23,22 @@ app.use((req, res, next) => {
 
 app.get('/health', async (req, res) => {
     try {
-        await testConnection();
+        await Promise.all([testDatabaseConnection(), testApiConnection()]);
         res.status(200).json({ status: 'ok' });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message || 'Supabase health check failed' });
+        res.status(500).json({ status: 'error', message: error.message || 'Health check failed' });
     }
 });
 
 app.use(playerRoutes);
 
-testConnection()
-    .then(() => console.log('Supabase connection OK'))
-    .catch((error) => console.error('Supabase connection failed:', error.message || error));
-
-app.listen(8080);
+Promise.all([testDatabaseConnection(), testApiConnection()])
+    .then(() => {
+        console.log('Supabase connection OK');
+        console.log('BSD API connection OK');
+        app.listen(8080, () => console.log('Server running on port 8080'));
+    })
+    .catch((error) => {
+        console.error('Startup connection failed:', error.message || error);
+        process.exit(1);
+    });
