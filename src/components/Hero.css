@@ -1,32 +1,150 @@
-.hero {
-    position: relative; /* Essential: This contains the absolute overlay */
-    background-image: url("/hero_background.png");
-    background-size: cover;
-    background-position: center;
-    height: 50vh;
+.hero-wrapper {
+    position: relative;
     width: 100%;
+    height: 100vh;
+    /* Pull up to sit behind the fixed header */
+    margin-top: -150px;
+    background: #0d0d0d;
+    overflow: hidden;
+}
+
+/* Ballpit canvas layer */
+.hero-canvas {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* Vignette: dark edges on all sides + strong bottom fade into games section */
+.hero-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background:
+        /* top fade — blends with the header */
+        linear-gradient(to bottom, rgba(13, 13, 13, 0.85) 0%, transparent 25%),
+        /* bottom fade — bleeds into #120a1c (games section bg) */
+        linear-gradient(
+                to top,
+                #120a1c 0%,
+                rgba(18, 10, 28, 0.7) 12%,
+                transparent 35%
+            ),
+        /* left & right edge darkening */
+        linear-gradient(to right, rgba(13, 13, 13, 0.5) 0%, transparent 15%),
+        linear-gradient(to left, rgba(13, 13, 13, 0.5) 0%, transparent 15%);
+}
+
+/* Hero text content */
+.hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none; /* ← lets clicks pass through to fixed header */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    overflow: hidden; /* Keeps the overlay from spilling out */
-}
-
-/* Removed the space between .hero and ::before */
-.hero::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1; /* Lower than the content */
-}
-
-.hero-content {
-    position: relative; /* REQUIRED for z-index to work */
-    z-index: 2; /* Higher than the overlay */
-    color: white;
+    justify-content: center;
     text-align: center;
+    padding: 0 5%;
+    color: white;
+    gap: 16px;
+}
+
+/* Re-enable pointer events only on actual interactive children */
+.hero-content a,
+.hero-content button {
+    pointer-events: auto;
+}
+
+.hero-eyebrow {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: aquamarine;
+    opacity: 0.9;
+}
+
+.hero-title {
+    font-size: clamp(8.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    font-family: cairo, sans-serif;
+    margin: 0;
+    /* Subtle glow matching the neon ball seams */
+    text-shadow:
+        0 0 40px rgba(0, 229, 255, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: clamp(3rem, 10vw, 5rem);
+    }
+    .hero-eyebrow {
+        font-size: 1.05rem;
+    }
+}
+
+.hero-title span {
+    color: aquamarine;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 480px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.hero-cta {
+    margin-top: 8px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hero-btn-primary {
+    padding: 14px 32px;
+    background: aquamarine;
+    color: #07060c;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.hero-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(127, 255, 212, 0.35);
+}
+
+.hero-btn-secondary {
+    padding: 14px 32px;
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.hero-btn-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        padding-top: 80px;
+    }
 }

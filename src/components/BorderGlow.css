@@ -29,7 +29,7 @@
 
 .border-glow-card::before,
 .border-glow-card::after,
-.border-glow-card > .edge-light {
+.border-glow-card>.edge-light {
     content: "";
     position: absolute;
     inset: 0;
@@ -38,14 +38,15 @@
     z-index: -1;
 }
 
-.border-glow-card > .edge-light {
-    z-index: 3; /* Move the thin 'laser' light to the very top layer */
+.border-glow-card>.edge-light {
+    z-index: 3;
+    /* Move the thin 'laser' light to the very top layer */
     pointer-events: none;
 }
 
 .border-glow-card:not(:hover):not(.sweep-active)::before,
 .border-glow-card:not(:hover):not(.sweep-active)::after,
-.border-glow-card:not(:hover):not(.sweep-active) > .edge-light {
+.border-glow-card:not(:hover):not(.sweep-active)>.edge-light {
     opacity: 0;
     transition: opacity 0.75s ease-in-out;
 }
@@ -56,152 +57,77 @@
     background:
         linear-gradient(var(--card-bg, #120f17) 0 100%) padding-box,
         linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
-        var(
-                --gradient-one,
-                radial-gradient(
-                    at 80% 55%,
-                    hsla(268, 100%, 76%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-two,
-                radial-gradient(
-                    at 69% 34%,
-                    hsla(349, 100%, 74%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-three,
-                radial-gradient(
-                    at 8% 6%,
-                    hsla(136, 100%, 78%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-four,
-                radial-gradient(
-                    at 41% 38%,
-                    hsla(192, 100%, 64%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-five,
-                radial-gradient(
-                    at 86% 85%,
-                    hsla(186, 100%, 74%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-six,
-                radial-gradient(
-                    at 82% 18%,
-                    hsla(52, 100%, 65%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
-        var(
-                --gradient-seven,
-                radial-gradient(
-                    at 51% 4%,
-                    hsla(12, 100%, 72%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            border-box,
+        var(--gradient-one,
+            radial-gradient(at 80% 55%,
+                hsla(268, 100%, 76%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-two,
+            radial-gradient(at 69% 34%,
+                hsla(349, 100%, 74%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-three,
+            radial-gradient(at 8% 6%,
+                hsla(136, 100%, 78%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-four,
+            radial-gradient(at 41% 38%,
+                hsla(192, 100%, 64%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-five,
+            radial-gradient(at 86% 85%,
+                hsla(186, 100%, 74%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-six,
+            radial-gradient(at 82% 18%,
+                hsla(52, 100%, 65%, 1) 0px,
+                transparent 50%)) border-box,
+        var(--gradient-seven,
+            radial-gradient(at 51% 4%,
+                hsla(12, 100%, 72%, 1) 0px,
+                transparent 50%)) border-box,
         var(--gradient-base, linear-gradient(#c299ff 0 100%)) border-box;
 
-    opacity: calc(
-        (var(--edge-proximity) - var(--color-sensitivity)) /
-            (100 - var(--color-sensitivity))
-    );
+    opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
 
-    mask-image: conic-gradient(
-        from var(--cursor-angle) at center,
-        black calc(var(--cone-spread) * 1%),
-        transparent calc((var(--cone-spread) + 15) * 1%),
-        transparent calc((100 - var(--cone-spread) - 15) * 1%),
-        black calc((100 - var(--cone-spread)) * 1%)
-    );
+    mask-image: conic-gradient(from var(--cursor-angle) at center,
+            black calc(var(--cone-spread) * 1%),
+            transparent calc((var(--cone-spread) + 15) * 1%),
+            transparent calc((100 - var(--cone-spread) - 15) * 1%),
+            black calc((100 - var(--cone-spread)) * 1%));
 }
 
 /* colored mesh-gradient background fill near edges */
 .border-glow-card::after {
     border: 1px solid transparent;
     background:
-        var(
-                --gradient-one,
-                radial-gradient(
-                    at 80% 55%,
-                    hsla(268, 100%, 76%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-two,
-                radial-gradient(
-                    at 69% 34%,
-                    hsla(349, 100%, 74%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-three,
-                radial-gradient(
-                    at 8% 6%,
-                    hsla(136, 100%, 78%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-four,
-                radial-gradient(
-                    at 41% 38%,
-                    hsla(192, 100%, 64%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-five,
-                radial-gradient(
-                    at 86% 85%,
-                    hsla(186, 100%, 74%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-six,
-                radial-gradient(
-                    at 82% 18%,
-                    hsla(52, 100%, 65%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
-        var(
-                --gradient-seven,
-                radial-gradient(
-                    at 51% 4%,
-                    hsla(12, 100%, 72%, 1) 0px,
-                    transparent 50%
-                )
-            )
-            padding-box,
+        var(--gradient-one,
+            radial-gradient(at 80% 55%,
+                hsla(268, 100%, 76%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-two,
+            radial-gradient(at 69% 34%,
+                hsla(349, 100%, 74%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-three,
+            radial-gradient(at 8% 6%,
+                hsla(136, 100%, 78%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-four,
+            radial-gradient(at 41% 38%,
+                hsla(192, 100%, 64%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-five,
+            radial-gradient(at 86% 85%,
+                hsla(186, 100%, 74%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-six,
+            radial-gradient(at 82% 18%,
+                hsla(52, 100%, 65%, 1) 0px,
+                transparent 50%)) padding-box,
+        var(--gradient-seven,
+            radial-gradient(at 51% 4%,
+                hsla(12, 100%, 72%, 1) 0px,
+                transparent 50%)) padding-box,
         var(--gradient-base, linear-gradient(#c299ff 0 100%)) padding-box;
 
     mask-image:
@@ -211,45 +137,34 @@
         radial-gradient(ellipse at 33% 33%, black 5%, transparent 40%),
         radial-gradient(ellipse at 66% 33%, black 5%, transparent 40%),
         radial-gradient(ellipse at 33% 66%, black 5%, transparent 40%),
-        conic-gradient(
-            from var(--cursor-angle) at center,
+        conic-gradient(from var(--cursor-angle) at center,
             transparent 5%,
             black 15%,
             black 85%,
-            transparent 95%
-        );
+            transparent 95%);
 
     mask-composite: subtract, add, add, add, add, add;
-    opacity: calc(
-        var(--fill-opacity, 0.5) *
-            (var(--edge-proximity) - var(--color-sensitivity)) /
-            (100 - var(--color-sensitivity))
-    );
+    opacity: calc(var(--fill-opacity, 0.5) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
     mix-blend-mode: soft-light;
 }
 
 /* outer glow layer */
-.border-glow-card > .edge-light {
+.border-glow-card>.edge-light {
     inset: calc(var(--glow-padding) * -1);
     pointer-events: none;
     z-index: 1;
 
-    mask-image: conic-gradient(
-        from var(--cursor-angle) at center,
-        black 2.5%,
-        transparent 10%,
-        transparent 90%,
-        black 97.5%
-    );
+    mask-image: conic-gradient(from var(--cursor-angle) at center,
+            black 2.5%,
+            transparent 10%,
+            transparent 90%,
+            black 97.5%);
 
-    opacity: calc(
-        (var(--edge-proximity) - var(--edge-sensitivity)) /
-            (100 - var(--edge-sensitivity))
-    );
+    opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
     mix-blend-mode: plus-lighter;
 }
 
-.border-glow-card > .edge-light::before {
+.border-glow-card>.edge-light::before {
     content: "";
     position: absolute;
     inset: var(--glow-padding);
@@ -273,12 +188,15 @@
 .border-glow-inner {
     display: flex;
     flex-direction: column;
+
     position: relative;
     /* Remove any potential background here */
     background: transparent !important;
     border-radius: inherit;
-    overflow: hidden; /* Keeps the game image from spilling over the rounded corners */
-    z-index: 2; /* Ensure content is above the glow effects */
+    overflow: hidden;
+    /* Keeps the game image from spilling over the rounded corners */
+    z-index: 2;
+    /* Ensure content is above the glow effects */
     height: 100%;
     width: 100%;
 }
