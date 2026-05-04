@@ -247,7 +247,8 @@ export default function AnaMeen() {
             <EarlyWin
                 earlyWin={earlyWin}
                 scores={scores}
-                handleContinue={handleContinue}></EarlyWin>
+                handleContinue={handleContinue}
+                handleNewGame={handleNewGame}></EarlyWin>
             {/* ── Answer Modal ── */}
             {showModal && (
                 <div className="popup-overlay">

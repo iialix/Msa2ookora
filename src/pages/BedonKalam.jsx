@@ -148,7 +148,8 @@ export default function BedonKalam() {
             <EarlyWin
                 earlyWin={earlyWin}
                 scores={scores}
-                handleContinue={handleContinue}></EarlyWin>
+                handleContinue={handleContinue}
+                handleNewGame={handleNewGame}></EarlyWin>
 
             {/* Header */}
             <div className="game-header">

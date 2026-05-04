@@ -85,9 +85,10 @@ export default function PasswordChallenge() {
                 setGameResult("انتهت اللعبة بالتعادل!");
             } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${currentScores.teamA > currentScores.teamB
-                        ? "الفريق 1"
-                        : "الفريق 2"
+                    `انتهت اللعبة! الفائز هو: ${
+                        currentScores.teamA > currentScores.teamB
+                            ? "الفريق 1"
+                            : "الفريق 2"
                     }`,
                 );
             }
@@ -148,7 +149,8 @@ export default function PasswordChallenge() {
             <EarlyWin
                 earlyWin={earlyWin}
                 scores={scores}
-                handleContinue={handleContinue}></EarlyWin>
+                handleContinue={handleContinue}
+                handleNewGame={handleNewGame}></EarlyWin>
 
             {/* Header */}
             <div className="game-header">
