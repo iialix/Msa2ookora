@@ -49,6 +49,12 @@ export default function GamesList() {
             image: "/fivexten.png",
             urlText: "fivexten",
         },
+        {
+            id: 8,
+            title: "Risk",
+            image: "/risk.png",
+            urlText: "risk",
+        },
     ];
 
     return (

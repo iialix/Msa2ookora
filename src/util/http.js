@@ -77,3 +77,12 @@ export async function fetchFivexTen() {
     }
     return data;
 }
+
+export async function fetchRisk() {
+    const response = await fetch("http://localhost:8080/risk");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch risk players");
+    }
+    return data;
+}

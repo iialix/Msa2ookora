@@ -10,6 +10,7 @@ import Offside from "./pages/Offside.jsx";
 import Bank from "./pages/Bank.jsx";
 import TopTen from "./pages/TopTen.jsx";
 import FivexTen from "./pages/FivexTen.jsx";
+import Risk from "./pages/Risk.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -48,6 +49,10 @@ function App() {
                 {
                     path: "/fivexten",
                     element: <FivexTen />,
+                },
+                {
+                    path: "/risk",
+                    element: <Risk />,
                 },
             ],
         },

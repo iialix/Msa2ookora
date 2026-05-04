@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./Timer.css";
 
-export default function Timer({ time, currentPlayer, reset, onEnd }) {
+export default function Timer({ time, currentPlayer, reset, onEnd, addedTime }) {
     const [timeLeft, setTimeLeft] = useState(time);
     const [isActive, setIsActive] = useState(false);
     const intervalRef = useRef(null);
@@ -17,12 +17,17 @@ export default function Timer({ time, currentPlayer, reset, onEnd }) {
     useEffect(() => {
         if (!isActive) return;
 
+        if (addedTime) {
+            setTimeLeft((t) => t + addedTime);
+            addedTime = 0;
+        }
+
         intervalRef.current = setInterval(() => {
             setTimeLeft((t) => t - 1);
         }, 1000);
 
         return () => clearInterval(intervalRef.current);
-    }, [isActive]);
+    }, [isActive, addedTime]);
 
     // Handle end safely here
     useEffect(() => {
