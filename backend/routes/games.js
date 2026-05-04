@@ -16,5 +16,8 @@ router.get('/offside', playerController.getOffsideQuestions);
 
 router.get('/fiveXten', playerController.getFiveXTenQuestions);
 
+router.get('/risk', playerController.getRiskQuestions);
+
+router.get('/infinityXO', playerController.getInfiniyXOQuestions);
 
 module.exports = router;

@@ -17,7 +17,8 @@ async function bsdFetch(path) {
 }
 
 async function testConnection() {
-    const data = await bsdFetch('/leagues/?page=1');
+    const data = await bsdFetch('/players/?search=mohamed salah');
+    console.log('BSD API test response:', data);
     if (!data.results) throw new Error('Unexpected response from BSD API');
     return true;
 }

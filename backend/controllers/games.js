@@ -1,4 +1,4 @@
-const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen } = require('../models/games.js');
+const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO } = require('../models/games.js');
 
 exports.getPasswordPlayers = async (req, res) => {
     try {
@@ -76,6 +76,26 @@ exports.getOffsideQuestions = async (req, res) => {
 exports.getFiveXTenQuestions = async (req, res) => {
     try {
         const questions = await FiveXTen.getFiveXTenQuestions();
+        res.status(200).json(questions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch questions' });
+        console.log(error);
+    }
+};
+
+exports.getRiskQuestions = async (req, res) => {
+    try {
+        const questions = await Risk.getRiskQuestions();
+        res.status(200).json(questions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch questions' });
+        console.log(error);
+    }
+};
+
+exports.getInfiniyXOQuestions = async (req, res) => {
+    try {
+        const questions = await InfinityXO.getInfinityXOQuestions();
         res.status(200).json(questions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch questions' });

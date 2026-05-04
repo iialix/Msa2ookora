@@ -148,4 +148,69 @@ class FiveXTen {
 }
 
 
-module.exports = { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen };
+class Risk {
+    constructor(category,question,answer,difficulty,choices) {
+        this.category = category; 
+        this.question = question;
+        this.answer = answer;
+        this.difficulty = difficulty;
+        this.choices = choices;
+    }
+
+    static async getRiskQuestions() {
+        const { data, error } = await supabase
+            .rpc('get_random_risk');
+
+        if (error) throw error;
+        if (!data) return [];
+
+        const ids = data.map((item) => item.category_id).filter(Boolean);
+        if (ids.length === 0) {
+            return data.map((item) => ({
+                category: null,
+            }));
+        }
+
+        const { data: categories, error: categoryError } = await supabase
+            .from('categories')
+            .select('id, category')
+            .in('id', ids);
+
+        if (categoryError) throw categoryError;
+
+        const categoryMap = new Map(categories.map((category) => [category.id, category.category]));
+
+        return data.map((item) => ({
+            question: item.question,
+            category: categoryMap.get(item.category_id) || null,
+            answer: item.answer,
+            difficulty: item.difficulty,
+            choices: JSON.parse(item.choices)
+        }));
+    }
+}
+
+class InfinityXO {
+    constructor(question, answer) {
+        this.question = question;
+        this.answer = ansewr;
+        this.choices = choices;
+    }
+
+    static async getInfinityXOQuestions() {
+        const { data, error } = await supabase
+            .rpc('get_random_infinityxo', { limit_count: 15 });
+
+        if (error) throw error;
+        if (!data) return [];
+
+        const parsedData = data.map(q => ({
+            ...q,
+            choices: JSON.parse(q.choices)
+        }));
+
+        return parsedData;
+    }
+}
+
+module.exports = { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO };
