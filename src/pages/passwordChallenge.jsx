@@ -6,6 +6,7 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const formatImageUrl = (url) => url.replace(".", "../../backend");
 
@@ -123,7 +124,7 @@ export default function PasswordChallenge() {
     if (isPending && !currentPlayer.image)
         return (
             <div className="game-container" dir="rtl">
-                جاري التحميل...
+                <LoadingIndicator />
             </div>
         );
 

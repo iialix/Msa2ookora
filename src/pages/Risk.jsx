@@ -4,6 +4,7 @@ import { fetchRisk } from "../util/http";
 import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
+import EarlyWin from "../components/EarlyWin";
 import "./Risk.css";
 
 const DIFFICULTY_LABELS = { 5: "سهل", 10: "متوسط", 20: "صعب", 40: "خبير" };
@@ -38,6 +39,8 @@ export default function Risk() {
     */
 
     const [gameResult, setGameResult] = useState(null);
+    const [earlyWin, setEarlyWin] = useState(null);
+    const [continued, setContinued] = useState(false);
 
     const { data, isPending, isError } = useQuery({
         queryKey: ["risk"],
@@ -65,10 +68,31 @@ export default function Risk() {
     useEffect(() => {
         if (data && data.length > 0 && doubleId === null) {
             const allIds = data.map((q, idx) => q.id ?? idx);
-            const randomDouble = allIds[Math.floor(Math.random() * allIds.length)];
+            const randomDouble =
+                allIds[Math.floor(Math.random() * allIds.length)];
             setDoubleId(randomDouble);
         }
     }, [data]);
+
+    // ── Early win detection ────────────────────────────────────
+    const totalRemainingPoints = useMemo(() => {
+        if (!data) return 0;
+        return data.reduce((sum, q, idx) => {
+            const id = q.id ?? idx;
+            if (usedIds[id] !== undefined) return sum;
+            return sum + q.difficulty;
+        }, 0);
+    }, [data, usedIds]);
+
+    useEffect(() => {
+        if (!data || earlyWin || gameResult) return;
+        const diff = scores.teamA - scores.teamB;
+        if (diff > totalRemainingPoints) {
+            setEarlyWin("الفريق 1");
+        } else if (-diff > totalRemainingPoints) {
+            setEarlyWin("الفريق 2");
+        }
+    }, [scores, totalRemainingPoints, data, earlyWin, gameResult]);
 
     const activeTeamKey = activeTeam === 1 ? "teamA" : "teamB";
     const otherTeam = activeTeam === 1 ? 2 : 1;
@@ -82,7 +106,9 @@ export default function Risk() {
         const isDouble = doubleId === q.id || doubleId === String(q.id);
         const pts = isDouble ? q.difficulty * 2 : q.difficulty;
         // Pre-shuffle choices so they don't reshuffle on re-render
-        const allChoices = q.choices ? [q.answer, ...q.choices].sort(() => Math.random() - 0.5) : [q.answer];
+        const allChoices = q.choices
+            ? [q.answer, ...q.choices].sort(() => Math.random() - 0.5)
+            : [q.answer];
         setShuffledChoices(allChoices);
         setModal({
             question: q.question,
@@ -110,10 +136,18 @@ export default function Risk() {
     };
 
     const markUsed = (correctAnswer) => {
-        setUsedIds((prev) => ({
-            ...prev,
-            [modal.qId]: correctAnswer ? modal.pickingTeam : null,
-        }));
+        if (modal.stealActive) {
+            // Steal phase: attribute to the stealing team (otherTeam), not the picking team
+            setUsedIds((prev) => ({
+                ...prev,
+                [modal.qId]: correctAnswer ? otherTeam : null,
+            }));
+        } else {
+            setUsedIds((prev) => ({
+                ...prev,
+                [modal.qId]: correctAnswer ? modal.pickingTeam : null,
+            }));
+        }
     };
 
     // ── Timer controls ───────────────────────────────────────────
@@ -139,7 +173,6 @@ export default function Risk() {
             // No steal reserved, just expire
             return { ...m, phase: "expired" };
         });
-        markUsed(false);
     };
 
     // ── Power-ups ────────────────────────────────────────────────
@@ -149,12 +182,11 @@ export default function Risk() {
             ...prev,
             [otherTeamKey]: { ...prev[otherTeamKey], steal: false },
         }));
-        // Immediately transition to steal phase with 10s timer
+        // Reserve steal — the other team will answer after the picking team finishes
         setModal((m) => ({
             ...m,
             stealActive: true,
             stealUsedBy: otherTeam,
-
             powerUpUsed: true,
         }));
     };
@@ -167,7 +199,6 @@ export default function Risk() {
         }));
         setModal((m) => ({
             ...m,
-            phase: "timer",
             powerUpUsed: true,
         }));
     };
@@ -177,12 +208,18 @@ export default function Risk() {
             ...prev,
             [activeTeamKey]: { ...prev[activeTeamKey], choices: false },
         }));
-        setModal((m) => ({ ...m, showChoices: true, powerUpUsed: true, timerKey: m.timerKey + 1, }));
+        setModal((m) => ({
+            ...m,
+            showChoices: true,
+            powerUpUsed: true,
+            timerKey: m.timerKey + 1,
+        }));
     };
 
     // ── Award points ─────────────────────────────────────────────
     const handleCorrect = () => {
-        const scoringTeam = modal.phase === "steal" ? otherTeamKey : activeTeamKey;
+        const scoringTeam =
+            modal.phase === "steal" ? otherTeamKey : activeTeamKey;
         setScores((prev) => {
             const updated = {
                 ...prev,
@@ -197,12 +234,29 @@ export default function Risk() {
     };
 
     const handleWrong = () => {
+        // If steal is reserved and we're still in the picking team's phase, transition to steal
+        if (modal.stealActive && modal.phase !== "steal") {
+            setModal((m) => ({
+                ...m,
+                phase: "steal",
+                timerKey: m.timerKey + 1,
+                timerDuration: 10,
+                showAnswer: false,
+            }));
+            setExtraTime(0);
+            return;
+        }
+        // Otherwise mark as wrong and close
         markUsed(false);
-        // Wrong on steal = no points; wrong on normal = no points, just close
         checkGameEndWithScores(scores);
         setExtraTime(0);
         closeModal();
     };
+
+    function handleContinue() {
+        setContinued(true);
+        setEarlyWin(null);
+    }
 
     const checkGameEndWithScores = (currentScores) => {
         // Game ends when all questions are used (including current)
@@ -229,7 +283,7 @@ export default function Risk() {
 
     const canExtraTime = () => {
         if (modal?.powerUpUsed) return false;
-        if (modal?.phase !== "timer") return false;
+        if (!modal || modal.phase === "idle") return false;
         return powerUps[activeTeamKey].extraTime;
     };
 
@@ -252,6 +306,7 @@ export default function Risk() {
                 حدث خطأ في تحميل البيانات
             </div>
         );
+
     if (gameResult)
         return (
             <GameResult
@@ -265,6 +320,13 @@ export default function Risk() {
 
     return (
         <div className="risk-container" dir="rtl">
+            {/* Early win popup */}
+            {!continued && <EarlyWin
+                earlyWin={earlyWin}
+                scores={scores}
+                handleContinue={handleContinue}
+                handleNewGame={handleNewGame}
+            />}
             {/* ── Header ── */}
             <div className="risk-header">
                 <ScoreBoard
@@ -343,7 +405,6 @@ export default function Risk() {
                                             <span className="cell-points">
                                                 {pts}
                                             </span>
-
                                         </>
                                     )}
                                 </button>
@@ -372,7 +433,9 @@ export default function Risk() {
                                     <button
                                         key={q.id}
                                         className={`risk-cell ${isUsed ? "used" : "available"} ${usedBy === 1 ? "team-a" : ""} ${usedBy === 2 ? "team-b" : ""}`}
-                                        onClick={() => !isUsed && openQuestion(q)}
+                                        onClick={() =>
+                                            !isUsed && openQuestion(q)
+                                        }
                                         disabled={isUsed}>
                                         {isUsed ? (
                                             <span className={`cell-used-icon `}>
@@ -386,7 +449,6 @@ export default function Risk() {
                                                 <span className="cell-difficulty">
                                                     {DIFFICULTY_LABELS[diff]}
                                                 </span>
-
                                             </>
                                         )}
                                     </button>

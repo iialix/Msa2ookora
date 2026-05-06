@@ -6,6 +6,7 @@ export default function Timer({ time, currentPlayer, reset, onEnd, addedTime }) 
     const [isActive, setIsActive] = useState(false);
     const intervalRef = useRef(null);
     const [showToast, setShowToast] = useState(false);
+    const lastAddedTimeRef = useRef(0);
 
     // Reset timer
     useEffect(() => {
@@ -13,21 +14,29 @@ export default function Timer({ time, currentPlayer, reset, onEnd, addedTime }) 
         setIsActive(false);
     }, [currentPlayer, time, reset]);
 
+    // Handle addedTime regardless of isActive state
+    useEffect(() => {
+        if (addedTime && addedTime !== lastAddedTimeRef.current) {
+            setTimeLeft((t) => t + addedTime);
+            lastAddedTimeRef.current = addedTime;
+        }
+    }, [addedTime]);
+
+    // Reset the ref when timer resets
+    useEffect(() => {
+        lastAddedTimeRef.current = 0;
+    }, [currentPlayer, reset]);
+
     // Start / stop interval
     useEffect(() => {
         if (!isActive) return;
-
-        if (addedTime) {
-            setTimeLeft((t) => t + addedTime);
-            addedTime = 0;
-        }
 
         intervalRef.current = setInterval(() => {
             setTimeLeft((t) => t - 1);
         }, 1000);
 
         return () => clearInterval(intervalRef.current);
-    }, [isActive, addedTime]);
+    }, [isActive]);
 
     // Handle end safely here
     useEffect(() => {
