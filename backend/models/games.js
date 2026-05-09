@@ -199,7 +199,7 @@ class InfinityXO {
 
     static async getInfinityXOQuestions() {
         const { data, error } = await supabase
-            .rpc('get_random_infinityxo', { limit_count: 15 });
+            .rpc('get_random_infinityxo', { limit_count: 45 });
 
         if (error) throw error;
         if (!data) return [];
