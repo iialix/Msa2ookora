@@ -86,3 +86,12 @@ export async function fetchRisk() {
     }
     return data;
 }
+
+export async function fetchInfinity() {
+    const response = await fetch("http://localhost:8080/infinityXO");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch infinity players");
+    }
+    return data;
+}

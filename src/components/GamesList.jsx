@@ -55,6 +55,12 @@ export default function GamesList() {
             image: "/risk.png",
             urlText: "risk",
         },
+        {
+            id: 9,
+            title: "Infinity XO",
+            image: "/infinityxo.png",
+            urlText: "infinityxo",
+        },
     ];
 
     return (

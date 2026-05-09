@@ -11,6 +11,7 @@ import Bank from "./pages/Bank.jsx";
 import TopTen from "./pages/TopTen.jsx";
 import FivexTen from "./pages/FivexTen.jsx";
 import Risk from "./pages/Risk.jsx";
+import InfinityXO from "./pages/InfinityXO";
 
 function App() {
     const router = createBrowserRouter([
@@ -53,6 +54,10 @@ function App() {
                 {
                     path: "/risk",
                     element: <Risk />,
+                },
+                {
+                    path: "/infinityxo",
+                    element: <InfinityXO />,
                 },
             ],
         },

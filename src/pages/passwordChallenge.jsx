@@ -123,7 +123,7 @@ export default function PasswordChallenge() {
 
     if (isPending && !currentPlayer.image)
         return (
-            <div className="game-container" dir="rtl">
+            <div className="game-container loading">
                 <LoadingIndicator />
             </div>
         );
