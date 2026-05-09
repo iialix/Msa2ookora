@@ -1,5 +1,6 @@
 
 const { supabase } = require('../util/database');
+const helper = require('../util/helperFunctions');
 
 class Player {
     constructor(name, imageUrl) {
@@ -213,4 +214,56 @@ class InfinityXO {
     }
 }
 
-module.exports = { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO };
+class XO {
+    constructor(categories1, categories2) {
+        this.categories1 = categories1;
+        this.categories2 = categories2;
+    }
+
+static async getXOCategories() {
+    const category1RandomNumbers = helper.discreteWeighted(9, {
+        countries: 1.5,
+        championships: 1.5,
+        clubs: 1,
+        coaches: 1
+    });
+
+    const category2RandomNumbers = helper.discreteWeighted(9, {
+        clubs: 1,
+        coaches: 1,
+        positions: 1
+    });
+
+    const positions = ["ST","RW","LW","CM","CDM","CAM","CB","LB","RB","GK"];
+
+        const [countries, championships, clubs, coaches] = await Promise.all([
+            supabase.rpc('get_random_countries', { limit_count: category1RandomNumbers.countries }),
+            supabase.rpc('get_random_championships', { limit_count: category1RandomNumbers.championships }),
+            supabase.rpc('get_random_clubs', { limit_count: category1RandomNumbers.clubs + category2RandomNumbers.clubs }),
+            supabase.rpc('get_random_coaches', { limit_count: category1RandomNumbers.coaches + category2RandomNumbers.coaches })
+        ]);
+
+        if (countries.error) throw countries.error;
+        if (championships.error) throw championships.error;
+        if (clubs.error) throw clubs.error;
+        if (coaches.error) throw coaches.error;
+        
+
+        const category1 = [
+            ...(countries.data || []),
+            ...(championships.data || []),
+            ...(clubs.data || []).slice(0, category1RandomNumbers.clubs),
+            ...(coaches.data || []).slice(0, category1RandomNumbers.coaches)
+        ];
+
+        const category2 = [
+            ...(clubs.data || []).slice(category1RandomNumbers.clubs),
+            ...(coaches.data || []).slice(category1RandomNumbers.coaches),
+            ...helper.getRandomElements(positions, category2RandomNumbers.positions)
+        ];
+
+        return { category1, category2 };
+    }
+}
+
+module.exports = { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO, XO };

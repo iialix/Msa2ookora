@@ -1,4 +1,4 @@
-const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO } = require('../models/games.js');
+const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO, XO } = require('../models/games.js');
 
 exports.getPasswordPlayers = async (req, res) => {
     try {
@@ -99,6 +99,17 @@ exports.getInfiniyXOQuestions = async (req, res) => {
         res.status(200).json(questions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch questions' });
+        console.log(error);
+    }
+};
+
+
+exports.getXOCategories = async (req, res) => {
+    try {
+        const categories = await XO.getXOCategories();
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
         console.log(error);
     }
 };

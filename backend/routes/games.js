@@ -20,4 +20,20 @@ router.get('/risk', playerController.getRiskQuestions);
 
 router.get('/infinityXO', playerController.getInfiniyXOQuestions);
 
+router.get('/xo', playerController.getXOCategories);
+
+/*
+    9 rows
+    9 columns
+
+    
+    + -> 9
+    + -> 9 
+
+    2, 3, 3, 1
+
+    random
+
+*/
+
 module.exports = router;
