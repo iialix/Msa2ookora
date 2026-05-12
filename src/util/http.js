@@ -1,3 +1,5 @@
+import { exp } from "three/tsl";
+
 export async function fetchPasswordPlayers() {
     const response = await fetch("http://localhost:8080/password");
     const data = await response.json();
@@ -92,6 +94,15 @@ export async function fetchInfinity() {
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.message || "Failed to fetch infinity players");
+    }
+    return data;
+}
+
+export async function fetchxo() {
+    const response = await fetch("http://localhost:8080/xo");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch XO players");
     }
     return data;
 }

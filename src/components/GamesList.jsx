@@ -61,6 +61,12 @@ export default function GamesList() {
             image: "/infinityxo.png",
             urlText: "infinityxo",
         },
+        {
+            id: 10,
+            title: "XO",
+            image: "/xo.png",
+            urlText: "xo",
+        },
     ];
 
     return (
