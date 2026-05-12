@@ -231,7 +231,7 @@ static async getXOCategories() {
     const category2RandomNumbers = helper.discreteWeighted(9, {
         clubs: 2,
         coaches: 0.5,
-        positions: 1
+        positions: 0.2
     });
 
     const positions = ["ST","RW","LW","CM","CDM","CAM","CB","LB","RB","GK"];
@@ -297,7 +297,7 @@ static async getXOCategories() {
         const category = helper.discreteWeighted(1, {
             clubs: 2,
             coaches: 0.5,
-            positions: 1
+            positions: 0.2
         });
 
         const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
