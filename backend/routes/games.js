@@ -22,6 +22,10 @@ router.get('/infinityXO', playerController.getInfiniyXOQuestions);
 
 router.get('/xo', playerController.getXOCategories);
 
+router.get('/changeXOColumn', playerController.getXOColumn);
+
+router.get('/changeXORow', playerController.getXORow);
+
 /*
     9 rows
     9 columns

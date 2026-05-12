@@ -1,3 +1,4 @@
+const { exp } = require('three/tsl');
 const { Player, AnaMeen, TopTen, Bank, Offside, FiveXTen, Risk, InfinityXO, XO } = require('../models/games.js');
 
 exports.getPasswordPlayers = async (req, res) => {
@@ -110,6 +111,26 @@ exports.getXOCategories = async (req, res) => {
         res.status(200).json(categories);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch categories' });
+        console.log(error);
+    }
+};
+
+exports.getXORow = async (req, res) => {
+    try {
+        const  category  = await XO.getXOCategoryRow();
+        res.status(200).json(category);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch category row' });
+        console.log(error);
+    }
+};
+exports.getXOColumn = async (req, res) => {
+    try {
+        const  category  = await XO.getXOCategoryColumn();
+        console.log(category);
+        res.status(200).json(category);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch category column' });
         console.log(error);
     }
 };

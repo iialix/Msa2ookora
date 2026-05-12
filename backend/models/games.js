@@ -224,13 +224,13 @@ static async getXOCategories() {
     const category1RandomNumbers = helper.discreteWeighted(9, {
         countries: 1.5,
         championships: 1.5,
-        clubs: 1,
+        clubs: 1.5,
         coaches: 1
     });
 
     const category2RandomNumbers = helper.discreteWeighted(9, {
-        clubs: 1,
-        coaches: 1,
+        clubs: 2,
+        coaches: 0.5,
         positions: 1
     });
 
@@ -249,23 +249,77 @@ static async getXOCategories() {
         if (coaches.error) throw coaches.error;
         
 
-        const category1 = [
+        const columns = [
             ...(countries.data || []),
             ...(championships.data || []),
             ...(clubs.data || []).slice(0, category1RandomNumbers.clubs),
             ...(coaches.data || []).slice(0, category1RandomNumbers.coaches)
         ];
 
-        const category2 = [
+        const rows = [
             ...(clubs.data || []).slice(category1RandomNumbers.clubs),
             ...(coaches.data || []).slice(category1RandomNumbers.coaches),
             ...helper.getRandomElements(positions, category2RandomNumbers.positions)
         ];
 
-        const shuffledCategory1 = helper.shuffle(category1);
-        const shuffledCategory2 = helper.shuffle(category2);
+        const shuffledCategory1 = helper.shuffle(columns);
+        const shuffledCategory2 = helper.shuffle(rows);
 
-        return { category1: shuffledCategory1, category2: shuffledCategory2 };
+        return { columns: shuffledCategory1, rows: shuffledCategory2 };
+    }
+    static async getXOCategoryColumn() {
+        const category = helper.discreteWeighted(1, {
+            countries: 1.5,
+            championships: 1.5,
+            clubs: 1.5,
+            coaches: 1
+        });
+
+        const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
+        if (!selectedCategory) return null;
+
+        const rpcMap = {
+            countries: 'get_random_countries',
+            championships: 'get_random_championships',
+            clubs: 'get_random_clubs',
+            coaches: 'get_random_coaches'
+        };
+
+        const rpcName = rpcMap[selectedCategory];
+        if (!rpcName) return null;
+
+        const { data, error } = await supabase.rpc(rpcName, { limit_count: 1 });
+        if (error) throw error;
+        return data;
+    }
+
+    static async getXOCategoryRow() {
+        const category = helper.discreteWeighted(1, {
+            clubs: 2,
+            coaches: 0.5,
+            positions: 1
+        });
+
+        const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
+        if (!selectedCategory) return null;
+
+        const positions = ["ST","RW","LW","CM","CDM","CAM","CB","LB","RB","GK"];
+
+        if (selectedCategory === 'positions') {
+            return helper.getRandomElements(positions, 1)[0] || null;
+        }
+
+        const rpcMap = {
+            clubs: 'get_random_clubs',
+            coaches: 'get_random_coaches'
+        };
+
+        const rpcName = rpcMap[selectedCategory];
+        if (!rpcName) return null;
+
+        const { data, error } = await supabase.rpc(rpcName, { limit_count: 1 });
+        if (error) throw error;
+        return data;
     }
 }
 
