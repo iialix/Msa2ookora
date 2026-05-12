@@ -262,7 +262,10 @@ static async getXOCategories() {
             ...helper.getRandomElements(positions, category2RandomNumbers.positions)
         ];
 
-        return { category1, category2 };
+        const shuffledCategory1 = helper.shuffle(category1);
+        const shuffledCategory2 = helper.shuffle(category2);
+
+        return { category1: shuffledCategory1, category2: shuffledCategory2 };
     }
 }
 

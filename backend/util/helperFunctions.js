@@ -30,5 +30,14 @@ function getRandomElements(arr, k) {
     return shuffled.slice(0, k);
 }
 
-module.exports = { discreteWeighted, getRandomElements };
+function shuffle(arr) {
+    const result = [...arr];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+module.exports = { discreteWeighted, getRandomElements, shuffle };
 
