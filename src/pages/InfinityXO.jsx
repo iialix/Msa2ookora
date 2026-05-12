@@ -335,6 +335,7 @@ export default function InfinityXO() {
                     earlyWin={earlyWin}
                     scores={{ teamA: roundWins.p1, teamB: roundWins.p2 }}
                     handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}
                 />
             )}
 
