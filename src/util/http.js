@@ -106,3 +106,15 @@ export async function fetchxo() {
     }
     return data;
 }
+
+export async function fetchReplacement(type) {
+    const url =
+        type === "col"
+            ? "http://localhost:8080/changeXOColumn"
+            : "http://localhost:8080/changeXORow";
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Network response was not ok");
+    const [replacement] = await res.json();
+    return replacement;
+}

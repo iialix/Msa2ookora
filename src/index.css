@@ -36,13 +36,17 @@
         --text-h: #f3f4f6;
         /* --bg: black; */
         --bg:
-            radial-gradient(circle at 20% 10%,
+            radial-gradient(
+                circle at 20% 10%,
                 rgba(192, 132, 252, 0.25) 0%,
                 rgba(170, 59, 255, 0.1) 25%,
-                transparent 60%),
-            radial-gradient(circle at 80% 30%,
+                transparent 60%
+            ),
+            radial-gradient(
+                circle at 80% 30%,
                 rgba(139, 92, 246, 0.18) 0%,
-                transparent 55%),
+                transparent 55%
+            ),
             linear-gradient(180deg, #120a1c 0%, #0b0813 40%, #07060c 100%);
         --border: #2e303a;
         --code-bg: #40005e;
@@ -66,4 +70,9 @@ body {
     overflow-x: hidden;
     max-width: 100%;
     text-align: center;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(170, 59, 255, 0.5) transparent;
 }

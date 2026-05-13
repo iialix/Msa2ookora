@@ -13,6 +13,7 @@ import FivexTen from "./pages/FivexTen.jsx";
 import Risk from "./pages/Risk.jsx";
 import InfinityXO from "./pages/InfinityXO";
 import XO from "./pages/XO.jsx";
+import XOXO from "./pages/XOXO.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -63,6 +64,10 @@ function App() {
                 {
                     path: "/xo",
                     element: <XO />,
+                },
+                {
+                    path: "/xoxo",
+                    element: <XOXO />,
                 },
             ],
         },
