@@ -225,12 +225,12 @@ static async getXOCategories() {
         countries: 1.5,
         championships: 1.5,
         clubs: 1.5,
-        coaches: 1
+        coaches: 0.5
     });
 
     const rowsRandomNumbers = helper.discreteWeighted(9, {
         clubs: 2,
-        coaches: 0.5,
+        coaches: 0.2,
         positions: 0.2
     });
 
