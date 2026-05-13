@@ -221,26 +221,26 @@ class XO {
     }
 
 static async getXOCategories() {
-    const category1RandomNumbers = helper.discreteWeighted(9, {
+    const columnsRandomNumbers = helper.discreteWeighted(9, {
         countries: 1.5,
         championships: 1.5,
         clubs: 1.5,
         coaches: 1
     });
 
-    const category2RandomNumbers = helper.discreteWeighted(9, {
+    const rowsRandomNumbers = helper.discreteWeighted(9, {
         clubs: 2,
         coaches: 0.5,
         positions: 0.2
     });
 
-    const positions = ["ST","RW","LW","CM","CDM","CAM","CB","LB","RB","GK"];
+    const positions = [{position: "ST"},{position: "RW"},{position: "LW"},{position: "CM"},{position: "CDM"},{position: "CAM"},{position: "CB"},{position: "LB"},{position: "RB"},{position: "GK"}];
 
         const [countries, championships, clubs, coaches] = await Promise.all([
-            supabase.rpc('get_random_countries', { limit_count: category1RandomNumbers.countries }),
-            supabase.rpc('get_random_championships', { limit_count: category1RandomNumbers.championships }),
-            supabase.rpc('get_random_clubs', { limit_count: category1RandomNumbers.clubs + category2RandomNumbers.clubs }),
-            supabase.rpc('get_random_coaches', { limit_count: category1RandomNumbers.coaches + category2RandomNumbers.coaches })
+            supabase.rpc('get_random_countries', { limit_count: columnsRandomNumbers.countries }),
+            supabase.rpc('get_random_championships', { limit_count: columnsRandomNumbers.championships }),
+            supabase.rpc('get_random_clubs', { limit_count: columnsRandomNumbers.clubs + rowsRandomNumbers.clubs }),
+            supabase.rpc('get_random_coaches', { limit_count: columnsRandomNumbers.coaches + rowsRandomNumbers.coaches })
         ]);
 
         if (countries.error) throw countries.error;
@@ -252,20 +252,43 @@ static async getXOCategories() {
         const columns = [
             ...(countries.data || []),
             ...(championships.data || []),
-            ...(clubs.data || []).slice(0, category1RandomNumbers.clubs),
-            ...(coaches.data || []).slice(0, category1RandomNumbers.coaches)
+            ...(clubs.data || []).slice(0, columnsRandomNumbers.clubs),
+            ...(coaches.data || []).slice(0, columnsRandomNumbers.coaches)
         ];
 
         const rows = [
-            ...(clubs.data || []).slice(category1RandomNumbers.clubs),
-            ...(coaches.data || []).slice(category1RandomNumbers.coaches),
-            ...helper.getRandomElements(positions, category2RandomNumbers.positions)
+            ...(clubs.data || []).slice(columnsRandomNumbers.clubs),
+            ...(coaches.data || []).slice(columnsRandomNumbers.coaches),
+            ...helper.getRandomElements(positions, rowsRandomNumbers.positions)
         ];
 
-        const shuffledCategory1 = helper.shuffle(columns);
-        const shuffledCategory2 = helper.shuffle(rows);
+        const shuffledcolumns = helper.shuffle(columns);
+        const shuffledrows = helper.shuffle(rows);
+        
+        const round1Columns = shuffledcolumns.slice(0, 3);
+        const round2Columns = shuffledcolumns.slice(3, 6);
+        const round3Columns = shuffledcolumns.slice(6, 9);
 
-        return { columns: shuffledCategory1, rows: shuffledCategory2 };
+        const round1Rows = shuffledrows.slice(0, 3);
+        const round2Rows = shuffledrows.slice(3, 6);
+        const round3Rows = shuffledrows.slice(6, 9);
+
+        const rounds = {
+            round1: {
+                columns: round1Columns,
+                rows: round1Rows
+            },
+            round2: {
+                columns: round2Columns,
+                rows: round2Rows
+            },
+            round3: {
+                columns: round3Columns,
+                rows: round3Rows
+            }
+        };
+
+        return { round1: rounds.round1, round2: rounds.round2, round3: rounds.round3 };
     }
     static async getXOCategoryColumn() {
         const category = helper.discreteWeighted(1, {
@@ -303,7 +326,7 @@ static async getXOCategories() {
         const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
         if (!selectedCategory) return null;
 
-        const positions = ["ST","RW","LW","CM","CDM","CAM","CB","LB","RB","GK"];
+        const positions = [{position: "ST"},{position: "RW"},{position: "LW"},{position: "CM"},{position: "CDM"},{position: "CAM"},{position: "CB"},{position: "LB"},{position: "RB"},{position: "GK"}];
 
         if (selectedCategory === 'positions') {
             return helper.getRandomElements(positions, 1)[0] || null;
