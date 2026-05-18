@@ -4,6 +4,7 @@ import { fetchBank } from "../util/http";
 import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./Bank.css";
 
 const QUESTIONS_PER_ROUND = 12;
@@ -44,9 +45,9 @@ export default function Bank() {
     // Slice the 12 questions for this round from fetched data
     const roundQuestions = data
         ? data.slice(
-            round * QUESTIONS_PER_ROUND,
-            (round + 1) * QUESTIONS_PER_ROUND,
-        )
+              round * QUESTIONS_PER_ROUND,
+              (round + 1) * QUESTIONS_PER_ROUND,
+          )
         : [];
     const currentQuestion = roundQuestions[questionIndex] || null;
 
@@ -131,8 +132,8 @@ export default function Bank() {
 
     if (isPending)
         return (
-            <div className="bank-game-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

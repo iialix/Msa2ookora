@@ -4,6 +4,7 @@ import { fetchxo } from "../util/http";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
 import { fetchReplacement } from "../util/http.js";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./TicTacToe.css";
 
 const formatImageUrl = (url) => url.replace(".", "../../backend");
@@ -204,8 +205,19 @@ export default function TicTacToe({ override }) {
                 if (cells[i]?.player === 1) countx++;
                 else if (cells[i]?.player === 2) counto++;
             }
-            if (countx === 5) return { winner: 1, line: null };
-            if (counto === 5) return { winner: 2, line: null };
+
+            if (countx === 5) {
+                const line = cells
+                    .map((c, i) => (c?.player === 1 ? i : null))
+                    .filter((i) => i !== null);
+                return { winner: 1, line };
+            }
+            if (counto === 5) {
+                const line = cells
+                    .map((c, i) => (c?.player === 2 ? i : null))
+                    .filter((i) => i !== null);
+                return { winner: 2, line };
+            }
         }
         return null;
     }
@@ -239,7 +251,12 @@ export default function TicTacToe({ override }) {
                   : 1,
         }));
 
-        if (result) resolveRoundEnd(result.winner, roundWins, round);
+        if (result) {
+            setTimeout(
+                () => resolveRoundEnd(result.winner, roundWins, round),
+                1000,
+            );
+        }
     };
 
     function handleSkip() {
@@ -254,11 +271,18 @@ export default function TicTacToe({ override }) {
     const handleContinue = () => {
         setContinued(true);
         setEarlyWin(null);
+
         if (round >= TOTAL_ROUNDS) {
             triggerGameEnd(roundWins);
         } else {
+            // roundWins is already updated — just show the summary with correct data
             setRoundSummary({
-                roundWinner: null,
+                roundWinner:
+                    roundWins.p1 > roundWins.p2
+                        ? "الفريق 1"
+                        : roundWins.p2 > roundWins.p1
+                          ? "الفريق 2"
+                          : null,
                 wins: roundWins,
                 nextRound: round + 1,
             });
@@ -284,7 +308,6 @@ export default function TicTacToe({ override }) {
             setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
         }
     };
-
     const resolveRoundEnd = (winner, currentWins, currentRound) => {
         const newWins = { ...currentWins };
         if (winner === 1) newWins.p1 += 1;
@@ -293,14 +316,15 @@ export default function TicTacToe({ override }) {
 
         const roundsLeft = TOTAL_ROUNDS - currentRound;
 
+        // Early win check — only set earlyWin, do NOT set roundSummary yet
         if (!continued && currentRound < TOTAL_ROUNDS) {
             if (newWins.p1 > newWins.p2 + roundsLeft) {
                 setEarlyWin("الفريق 1");
-                return;
+                return; // ← stop here, handleContinue will set roundSummary
             }
             if (newWins.p2 > newWins.p1 + roundsLeft) {
                 setEarlyWin("الفريق 2");
-                return;
+                return; // ← stop here
             }
         }
 
@@ -309,17 +333,17 @@ export default function TicTacToe({ override }) {
             return;
         }
 
+        // Normal round end
         setRoundSummary({
             roundWinner: winner ? `الفريق ${winner}` : null,
             wins: newWins,
             nextRound: currentRound + 1,
         });
     };
-
     if (isPending)
         return (
-            <div className="xo-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

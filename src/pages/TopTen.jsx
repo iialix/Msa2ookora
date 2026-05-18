@@ -5,6 +5,7 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./TopTen.css";
 import { button } from "framer-motion/client";
 
@@ -183,8 +184,8 @@ export default function TopTen() {
 
     if (isPending)
         return (
-            <div className="topten-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

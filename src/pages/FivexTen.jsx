@@ -7,6 +7,7 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 import Timer from "../components/Timer";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./Offside.css";
 
 export default function FivexTen() {
@@ -97,8 +98,8 @@ export default function FivexTen() {
 
     if (isPending)
         return (
-            <div className="offside-game-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

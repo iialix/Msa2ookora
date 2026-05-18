@@ -1,5 +1,5 @@
 /* ── Container ── */
-.xo-container {
+.infinityxo-container {
     max-width: 560px;
     margin: 40px auto;
     background: #1a1625;
@@ -16,13 +16,14 @@
 }
 
 @media (max-width: 768px) {
-    .xo-container {
-        max-width: 80%;
+    .infinityxo-container {
+        max-width: 83%;
+        margin: 20px auto;
     }
 }
 
 /* ── Header ── */
-.xo-header {
+.infinityxo-header {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -30,7 +31,7 @@
     justify-content: center;
 }
 
-.xo-player-badge {
+.infinityxo-player-badge {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -69,7 +70,7 @@
     color: rgba(127, 255, 212, 0.35);
 }
 
-.xo-symbol {
+.infinityxo-symbol {
     font-size: 1.2rem;
     font-weight: 900;
 }
@@ -93,21 +94,21 @@
     }
 }
 
-.xo-vs {
+.infinityxo-vs {
     font-size: 0.85rem;
     font-weight: 800;
     color: rgba(255, 255, 255, 0.2);
     letter-spacing: 0.1em;
 }
 
-.xo-turn-label {
+.infinityxo-turn-label {
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 /* ── Grid ── */
-.xo-grid {
+.infinityxo-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
@@ -115,7 +116,7 @@
     max-width: 360px;
 }
 
-.xo-cell {
+.infinityxo-cell {
     aspect-ratio: 1;
     border-radius: 18px;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -128,18 +129,18 @@
     font-family: inherit;
 }
 
-.xo-cell.empty:hover:not(:disabled) {
+.infinityxo-cell.empty:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.25);
     transform: scale(1.04);
 }
 
-.xo-cell.p1 {
+.infinityxo-cell.p1 {
     background: rgba(108, 92, 231, 0.15);
     border-color: #6c5ce7;
 }
 
-.xo-cell.p2 {
+.infinityxo-cell.p2 {
     background: rgba(127, 255, 212, 0.1);
     border-color: #7fffd4;
 }
@@ -150,15 +151,15 @@
     line-height: 1;
 }
 
-.xo-cell.p1 .cell-symbol {
+.infinityxo-cell.p1 .cell-symbol {
     color: #a89af5;
 }
-.xo-cell.p2 .cell-symbol {
+.infinityxo-cell.p2 .cell-symbol {
     color: #7fffd4;
 }
 
 /* Winning cells */
-.xo-cell.win-cell {
+.infinityxo-cell.win-cell {
     animation: winPulse 0.6s ease forwards;
 }
 
@@ -174,29 +175,29 @@
     }
 }
 
-.xo-cell.win-cell.p1 {
+.infinityxo-cell.win-cell.p1 {
     background: rgba(108, 92, 231, 0.4);
     border-color: #a89af5;
     box-shadow: 0 0 24px rgba(108, 92, 231, 0.6);
 }
 
-.xo-cell.win-cell.p2 {
+.infinityxo-cell.win-cell.p2 {
     background: rgba(127, 255, 212, 0.3);
     border-color: #7fffd4;
     box-shadow: 0 0 24px rgba(127, 255, 212, 0.5);
 }
 
 /* Oldest symbol — about to be removed */
-.xo-cell.oldest {
+.infinityxo-cell.oldest {
     border-style: dashed;
     opacity: 0.55;
     animation: oldestWarn 1s infinite;
 }
 
-.xo-cell.oldest.p1 {
+.infinityxo-cell.oldest.p1 {
     border-color: #a89af5;
 }
-.xo-cell.oldest.p2 {
+.infinityxo-cell.oldest.p2 {
     border-color: #7fffd4;
 }
 
@@ -211,7 +212,7 @@
 }
 
 /* Fading out — removal animation */
-.xo-cell.fading {
+.infinityxo-cell.fading {
     animation: fadeRemove 0.7s ease forwards;
 }
 
@@ -231,14 +232,14 @@
 }
 
 /* ── Questions left ── */
-.xo-questions-left {
+.infinityxo-questions-left {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.3);
     margin: 0;
 }
 
 /* ── Overlay ── */
-.xo-overlay {
+.infinityxo-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
@@ -251,7 +252,7 @@
 }
 
 /* ── Modal ── */
-.xo-modal {
+.infinityxo-modal {
     background: #1e1830;
     border-radius: 24px;
     padding: 28px 24px;
@@ -265,10 +266,10 @@
     border: 1px solid transparent;
 }
 
-.xo-modal.modal-p1 {
+.infinityxo-modal.modal-p1 {
     border-color: rgba(108, 92, 231, 0.4);
 }
-.xo-modal.modal-p2 {
+.infinityxo-modal.modal-p2 {
     border-color: rgba(127, 255, 212, 0.3);
 }
 
@@ -303,7 +304,7 @@
     color: #7fffd4;
 }
 
-.xo-modal-question {
+.infinityxo-modal-question {
     font-size: 1.1rem;
     font-weight: 600;
     line-height: 1.8;
@@ -316,13 +317,13 @@
 }
 
 /* ── Choices ── */
-.xo-choices {
+.infinityxo-choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
 }
 
-.xo-choice {
+.infinityxo-choice {
     padding: 14px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -337,13 +338,13 @@
     line-height: 1.4;
 }
 
-.xo-choice:hover:not(.locked) {
+.infinityxo-choice:hover:not(.locked) {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
 }
 
-.xo-choice.correct {
+.infinityxo-choice.correct {
     background: rgba(0, 184, 148, 0.2);
     border-color: #00b894;
     color: #55efc4;
@@ -362,18 +363,18 @@
     }
 }
 
-.xo-choice.wrong {
+.infinityxo-choice.wrong {
     background: rgba(214, 48, 49, 0.2);
     border-color: #d63031;
     color: #ff7675;
 }
 
-.xo-choice.locked {
+.infinityxo-choice.locked {
     cursor: not-allowed;
 }
 
 /* Result message */
-.xo-result-msg {
+.infinityxo-result-msg {
     font-size: 1rem;
     font-weight: 700;
     margin: 0;
@@ -405,20 +406,20 @@
 }
 
 /* ── Round info in header ── */
-.xo-round-info {
+.infinityxo-round-info {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
 }
 
-.xo-round-label {
+.infinityxo-round-label {
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.4);
     letter-spacing: 0.05em;
 }
 
-.xo-wins-row {
+.infinityxo-wins-row {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -437,7 +438,7 @@
 }
 
 /* ── Summary screen ── */
-.xo-summary {
+.infinityxo-summary {
     justify-content: center;
 }
 

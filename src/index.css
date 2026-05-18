@@ -74,5 +74,6 @@ body {
 
 * {
     scrollbar-width: thin;
+    scrollbar-darkshadow-color: transparent;
     scrollbar-color: rgba(170, 59, 255, 0.5) transparent;
 }

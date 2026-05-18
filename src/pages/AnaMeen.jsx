@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import "./AnaMeen.css";
 import { fetchAnaMeen } from "../util/http";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
@@ -55,8 +56,8 @@ export default function AnaMeen() {
 
     if (isPending)
         return (
-            <div className="game-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

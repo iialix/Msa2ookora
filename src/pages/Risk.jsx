@@ -5,6 +5,7 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./Risk.css";
 
 const DIFFICULTY_LABELS = { 5: "سهل", 10: "متوسط", 20: "صعب", 40: "خبير" };
@@ -296,8 +297,8 @@ export default function Risk() {
     // ── Render ───────────────────────────────────────────────────
     if (isPending)
         return (
-            <div className="risk-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)
@@ -321,12 +322,14 @@ export default function Risk() {
     return (
         <div className="risk-container" dir="rtl">
             {/* Early win popup */}
-            {!continued && <EarlyWin
-                earlyWin={earlyWin}
-                scores={scores}
-                handleContinue={handleContinue}
-                handleNewGame={handleNewGame}
-            />}
+            {!continued && (
+                <EarlyWin
+                    earlyWin={earlyWin}
+                    scores={scores}
+                    handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}
+                />
+            )}
             {/* ── Header ── */}
             <div className="risk-header">
                 <ScoreBoard

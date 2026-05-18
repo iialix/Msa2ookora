@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchInfinity } from "../util/http";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
-import "./InfinityXO.css";
+import LoadingIndicator from "../components/LoadingIndicator";
+import "./Infinityxo.css";
 
 const TOTAL_ROUNDS = 3;
 const QUESTIONS_PER_ROUND = 15;
@@ -41,7 +42,7 @@ function initRoundState() {
     };
 }
 
-export default function InfinityXO() {
+export default function Infinityinfinityxo() {
     const [round, setRound] = useState(1);
     const [roundWins, setRoundWins] = useState({ p1: 0, p2: 0 });
     // Global question index across all rounds (into the full question bank)
@@ -68,8 +69,14 @@ export default function InfinityXO() {
     });
 
     const handleNewGame = () => window.location.reload();
-    const shuffleChoices = (q) =>
-        [q.answer, ...q.choices].sort(() => Math.random() - 0.5);
+    const shuffleChoices = (q) => {
+        const arr = [q.answer, ...q.choices];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
 
     const { cells, activePlayer, orderCounter, winResult, pendingRemove } =
         roundState;
@@ -267,13 +274,13 @@ export default function InfinityXO() {
 
     if (isPending)
         return (
-            <div className="xo-container" dir="rtl">
-                جاري التحميل...
+            <div className="infinityxo-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)
         return (
-            <div className="xo-container" dir="rtl">
+            <div className="infinityxo-container" dir="rtl">
                 حدث خطأ في تحميل البيانات
             </div>
         );
@@ -289,7 +296,7 @@ export default function InfinityXO() {
 
     if (roundSummary) {
         return (
-            <div className="xo-container xo-summary" dir="rtl">
+            <div className="infinityxo-container infinityxo-summary" dir="rtl">
                 <div className="summary-card">
                     <div className="summary-icon">
                         {roundSummary.roundWinner ? "🏆" : "🤝"}
@@ -329,7 +336,7 @@ export default function InfinityXO() {
     const winLine = winResult?.line || [];
 
     return (
-        <div className="xo-container" dir="rtl">
+        <div className="infinityxo-container" dir="rtl">
             {round !== 3 && (
                 <EarlyWin
                     earlyWin={earlyWin}
@@ -340,37 +347,37 @@ export default function InfinityXO() {
             )}
 
             {/* ── Header ── */}
-            <div className="xo-header">
+            <div className="infinityxo-header">
                 <div
-                    className={`xo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
-                    <span className="xo-symbol">✕</span>
+                    className={`infinityxo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
+                    <span className="infinityxo-symbol">✕</span>
                     <span>الفريق 1</span>
                     {activePlayer === 1 && <span className="turn-dot" />}
                 </div>
-                <div className="xo-round-info">
-                    <span className="xo-round-label">
+                <div className="infinityxo-round-info">
+                    <span className="infinityxo-round-label">
                         جولة {round} / {TOTAL_ROUNDS}
                     </span>
-                    <div className="xo-wins-row">
+                    <div className="infinityxo-wins-row">
                         <span className="wins-p1">{roundWins.p1} ✕</span>
                         <span className="wins-sep">—</span>
                         <span className="wins-p2">○ {roundWins.p2}</span>
                     </div>
                 </div>
                 <div
-                    className={`xo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
-                    <span className="xo-symbol">○</span>
+                    className={`infinityxo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
+                    <span className="infinityxo-symbol">○</span>
                     <span>الفريق 2</span>
                     {activePlayer === 2 && <span className="turn-dot" />}
                 </div>
             </div>
 
-            <p className="xo-turn-label">
+            <p className="infinityxo-turn-label">
                 دور {activePlayer === 1 ? "الفريق 1 ✕" : "الفريق 2 ○"}
             </p>
 
             {/* ── Grid ── */}
-            <div className="xo-grid">
+            <div className="infinityxo-grid">
                 {cells.map((cell, idx) => {
                     const isWinCell = winLine.includes(idx);
                     const isFading = pendingRemove === idx;
@@ -390,13 +397,13 @@ export default function InfinityXO() {
                     return (
                         <button
                             key={idx}
-                            className={`xo-cell
+                            className={`infinityxo-cell
                                 ${isEmpty ? "empty" : ""}
                                 ${cell?.player === 1 ? "p1" : ""}
                                 ${cell?.player === 2 ? "p2" : ""}
                                 ${isWinCell ? "win-cell" : ""}
-                                ${isFading ? "fading" : ""}
-                                ${isOldest ? "oldest" : ""}
+                                ${isFading && !isWinCell ? "fading" : ""}
+                                ${isOldest && !isWinCell ? "oldest" : ""}
                             `}
                             onClick={() => handleCellClick(idx)}
                             disabled={!!modal || !!winResult}>
@@ -412,21 +419,23 @@ export default function InfinityXO() {
             </div>
 
             {/* Shows remaining questions for the CURRENT round only */}
-            <p className="xo-questions-left">
+            <p className="infinityxo-questions-left">
                 أسئلة متبقية: {QUESTIONS_PER_ROUND - roundQuestionCount}
             </p>
 
             {/* ── Question Modal ── */}
             {modal && (
-                <div className="xo-overlay">
+                <div className="infinityxo-overlay">
                     <div
-                        className={`xo-modal ${activePlayer === 1 ? "modal-p1" : "modal-p2"}`}
+                        className={`infinityxo-modal ${activePlayer === 1 ? "modal-p1" : "modal-p2"}`}
                         dir="rtl">
                         <div className="modal-player-tag">
                             {activePlayer === 1 ? "✕ الفريق 1" : "○ الفريق 2"}
                         </div>
-                        <p className="xo-modal-question">{modal.question}</p>
-                        <div className="xo-choices">
+                        <p className="infinityxo-modal-question">
+                            {modal.question}
+                        </p>
+                        <div className="infinityxo-choices">
                             {modal.shuffledChoices.map((choice, i) => {
                                 let state = "";
                                 if (answered && choice === modal.answer)
@@ -436,7 +445,7 @@ export default function InfinityXO() {
                                 return (
                                     <button
                                         key={i}
-                                        className={`xo-choice ${state} ${answered ? "locked" : ""}`}
+                                        className={`infinityxo-choice ${state} ${answered ? "locked" : ""}`}
                                         onClick={() =>
                                             handleChoiceClick(choice)
                                         }
@@ -448,7 +457,7 @@ export default function InfinityXO() {
                         </div>
                         {answered && (
                             <p
-                                className={`xo-result-msg ${correct ? "correct-msg" : "wrong-msg"}`}>
+                                className={`infinityxo-result-msg ${correct ? "correct-msg" : "wrong-msg"}`}>
                                 {correct ? "✓ إجابة صحيحة!" : "✗ إجابة خاطئة"}
                             </p>
                         )}

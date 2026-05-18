@@ -122,8 +122,8 @@ export default function BedonKalam() {
 
     if (isPending)
         return (
-            <div className="game-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)

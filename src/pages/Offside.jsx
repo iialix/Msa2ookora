@@ -5,6 +5,7 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 import Timer from "../components/Timer";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./Offside.css";
 
 async function fetchOffside() {
@@ -104,8 +105,8 @@ export default function Offside() {
 
     if (isPending)
         return (
-            <div className="offside-game-container" dir="rtl">
-                جاري التحميل...
+            <div className="game-container loading">
+                <LoadingIndicator />
             </div>
         );
     if (isError)
