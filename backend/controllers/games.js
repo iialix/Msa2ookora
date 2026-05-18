@@ -138,6 +138,15 @@ exports.getXOCategories = async (req, res) => {
         console.log(error);
     }
 };
+exports.getXORound = async (req, res) => {
+    try {
+        const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(3,3);
+        res.status(200).json({Round:{ columns: shuffledcolumns, rows: shuffledrows }});
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
+        console.log(error);
+    }
+};
 
 exports.getXORow = async (req, res) => {
     try {

@@ -26,6 +26,8 @@ router.get('/changeXOColumn', playerController.getXOColumn);
 
 router.get('/changeXORow', playerController.getXORow);
 
+router.get('/changeXORound', playerController.getXORound);
+
 router.get('/connectFour', playerController.getConnectFour);
 
 /*
