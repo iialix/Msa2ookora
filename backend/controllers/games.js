@@ -107,8 +107,32 @@ exports.getInfiniyXOQuestions = async (req, res) => {
 
 exports.getXOCategories = async (req, res) => {
     try {
-        const categories = await XO.getXOCategories();
-        res.status(200).json(categories);
+        const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(9,9);
+        
+        const round1Columns = shuffledcolumns.slice(0, 3);
+        const round2Columns = shuffledcolumns.slice(3, 6);
+        const round3Columns = shuffledcolumns.slice(6, 9);
+
+        const round1Rows = shuffledrows.slice(0, 3);
+        const round2Rows = shuffledrows.slice(3, 6);
+        const round3Rows = shuffledrows.slice(6, 9);
+
+        const rounds = {
+            round1: {
+                columns: round1Columns,
+                rows: round1Rows
+            },
+            round2: {
+                columns: round2Columns,
+                rows: round2Rows
+            },
+            round3: {
+                columns: round3Columns,
+                rows: round3Rows
+            }
+        };
+        
+        res.status(200).json({ round1: rounds.round1, round2: rounds.round2, round3: rounds.round3 });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch categories' });
         console.log(error);
@@ -117,8 +141,8 @@ exports.getXOCategories = async (req, res) => {
 
 exports.getXORow = async (req, res) => {
     try {
-        const  category  = await XO.getXOCategoryRow();
-        res.status(200).json(category);
+        const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(0,1);
+        res.status(200).json({Row: shuffledrows});
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch category row' });
         console.log(error);
@@ -126,9 +150,17 @@ exports.getXORow = async (req, res) => {
 };
 exports.getXOColumn = async (req, res) => {
     try {
-        const  category  = await XO.getXOCategoryColumn();
-        console.log(category);
-        res.status(200).json(category);
+        const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(1,0);
+        res.status(200).json({Column: shuffledcolumns});
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch category column' });
+        console.log(error);
+    }
+};
+exports.getConnectFour = async (req, res) => {
+    try {
+        const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(7,6);
+        res.status(200).json({Columns: shuffledcolumns,rows:shuffledrows});
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch category column' });
         console.log(error);

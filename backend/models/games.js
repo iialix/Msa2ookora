@@ -220,19 +220,20 @@ class XO {
         this.categories2 = categories2;
     }
 
-static async getXOCategories() {
-    const columnsRandomNumbers = helper.discreteWeighted(9, {
-        countries: 1.5,
-        championships: 1.5,
-        clubs: 1.5,
-        coaches: 0.5
-    });
+static async getXOCategories(numColumns,numRows) {
 
-    const rowsRandomNumbers = helper.discreteWeighted(9, {
-        clubs: 2,
-        coaches: 0.2,
-        positions: 0.2
-    });
+        const columnsRandomNumbers = helper.discreteWeighted(numColumns, {
+            countries: 1.5,
+            championships: 1.5,
+            clubs: 1.5,
+            coaches: 0.5
+        });
+    
+        const rowsRandomNumbers = helper.discreteWeighted(numRows, {
+            clubs: 2,
+            coaches: 0.2,
+            positions: 0.2
+        });
 
     const positions = [{position: "ST"},{position: "RW"},{position: "LW"},{position: "CM"},{position: "CDM"},{position: "CAM"},{position: "CB"},{position: "LB"},{position: "RB"},{position: "GK"}];
 
@@ -264,85 +265,8 @@ static async getXOCategories() {
 
         const shuffledcolumns = helper.shuffle(columns);
         const shuffledrows = helper.shuffle(rows);
-        
-        const round1Columns = shuffledcolumns.slice(0, 3);
-        const round2Columns = shuffledcolumns.slice(3, 6);
-        const round3Columns = shuffledcolumns.slice(6, 9);
 
-        const round1Rows = shuffledrows.slice(0, 3);
-        const round2Rows = shuffledrows.slice(3, 6);
-        const round3Rows = shuffledrows.slice(6, 9);
-
-        const rounds = {
-            round1: {
-                columns: round1Columns,
-                rows: round1Rows
-            },
-            round2: {
-                columns: round2Columns,
-                rows: round2Rows
-            },
-            round3: {
-                columns: round3Columns,
-                rows: round3Rows
-            }
-        };
-
-        return { round1: rounds.round1, round2: rounds.round2, round3: rounds.round3 };
-    }
-    static async getXOCategoryColumn() {
-        const category = helper.discreteWeighted(1, {
-            countries: 1.5,
-            championships: 1.5,
-            clubs: 1.5,
-            coaches: 1
-        });
-
-        const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
-        if (!selectedCategory) return null;
-
-        const rpcMap = {
-            countries: 'get_random_countries',
-            championships: 'get_random_championships',
-            clubs: 'get_random_clubs',
-            coaches: 'get_random_coaches'
-        };
-
-        const rpcName = rpcMap[selectedCategory];
-        if (!rpcName) return null;
-
-        const { data, error } = await supabase.rpc(rpcName, { limit_count: 1 });
-        if (error) throw error;
-        return data;
-    }
-
-    static async getXOCategoryRow() {
-        const category = helper.discreteWeighted(1, {
-            clubs: 2,
-            coaches: 0.5,
-            positions: 0.2
-        });
-
-        const selectedCategory = Object.keys(category).find((key) => category[key] === 1);
-        if (!selectedCategory) return null;
-
-        const positions = [{position: "ST"},{position: "RW"},{position: "LW"},{position: "CM"},{position: "CDM"},{position: "CAM"},{position: "CB"},{position: "LB"},{position: "RB"},{position: "GK"}];
-
-        if (selectedCategory === 'positions') {
-            return helper.getRandomElements(positions, 1)[0] || null;
-        }
-
-        const rpcMap = {
-            clubs: 'get_random_clubs',
-            coaches: 'get_random_coaches'
-        };
-
-        const rpcName = rpcMap[selectedCategory];
-        if (!rpcName) return null;
-
-        const { data, error } = await supabase.rpc(rpcName, { limit_count: 1 });
-        if (error) throw error;
-        return data;
+        return { shuffledcolumns, shuffledrows };
     }
 }
 

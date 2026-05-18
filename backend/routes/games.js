@@ -26,6 +26,8 @@ router.get('/changeXOColumn', playerController.getXOColumn);
 
 router.get('/changeXORow', playerController.getXORow);
 
+router.get('/connectFour', playerController.getConnectFour);
+
 /*
     9 rows
     9 columns
