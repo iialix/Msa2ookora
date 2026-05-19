@@ -6,7 +6,7 @@
     height: 150px;
 
     position: relative;
-    z-index: 9999; /* above hero-content (z-index:10) and vignette (z-index:5) */
+    z-index: 7;
 
     background: linear-gradient(
         to bottom,

@@ -1,9 +1,8 @@
 import { useState, useRef, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchxo } from "../util/http";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
-import { fetchReplacement } from "../util/http.js";
+import { fetchReplacement, fetchxo } from "../util/http.js";
 import LoadingIndicator from "../components/LoadingIndicator";
 import "./TicTacToe.css";
 
@@ -136,9 +135,9 @@ export default function TicTacToe({ override }) {
     const { refetch, isFetching } = useQuery({
         queryKey: ["swapCategory"],
         queryFn: () => fetchReplacement(swapTargetRef.current.type),
-        enabled: false, // never runs automatically
-        staleTime: 0, // always re-fetch, never serve cached data
-        gcTime: 0, // don't cache between swaps
+        enabled: false,
+        staleTime: 0,
+        gcTime: 0,
         retry: false,
     });
 

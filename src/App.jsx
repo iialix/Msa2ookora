@@ -12,8 +12,8 @@ import TopTen from "./pages/TopTen.jsx";
 import FivexTen from "./pages/FivexTen.jsx";
 import Risk from "./pages/Risk.jsx";
 import InfinityXO from "./pages/InfinityXO";
-import XO from "./pages/XO.jsx";
-import XOXO from "./pages/XOXO.jsx";
+import TicTacToe from "./components/TicTacToe";
+import Connect4 from "./pages/Connect4.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -63,11 +63,15 @@ function App() {
                 },
                 {
                     path: "/xo",
-                    element: <XO />,
+                    element: <TicTacToe override={false} />,
                 },
                 {
                     path: "/xoxo",
-                    element: <XOXO />,
+                    element: <TicTacToe override={true} />,
+                },
+                {
+                    path: "/connect4",
+                    element: <Connect4 />,
                 },
             ],
         },

@@ -470,8 +470,10 @@
     transform: translateY(-3px);
 }
 
-.category.category-loading {
-    opacity: 0.6;
+.category-wrapper-loading {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
     cursor: wait;
 }
 

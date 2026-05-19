@@ -7,6 +7,7 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
+import LoadingIndicator from "../components/LoadingIndicator";
 import "./BedonKalam.css";
 
 const formatImageUrl = (url) => url.replace(".", "backend");
