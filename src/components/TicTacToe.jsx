@@ -2,7 +2,7 @@ import { useState, useRef, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
-import { fetchReplacement, fetchxo } from "../util/http.js";
+import { fetchReplacement, fetchxo, fetchChangeRound } from "../util/http.js";
 import LoadingIndicator from "../components/LoadingIndicator";
 import "./TicTacToe.css";
 
@@ -126,13 +126,8 @@ export default function TicTacToe({ override }) {
         };
     };
 
-    const handleShuffleAll = () => {
-        setRoundCategories(getAllCategories());
-        setTooltip(null);
-    };
-
     // Long-press: call the API to get a replacement, then swap it in
-    const { refetch, isFetching } = useQuery({
+    const { refetch, isFetching: isFetchingNewRound } = useQuery({
         queryKey: ["swapCategory"],
         queryFn: () => fetchReplacement(swapTargetRef.current.type),
         enabled: false,
@@ -141,9 +136,29 @@ export default function TicTacToe({ override }) {
         retry: false,
     });
 
+    const { refetch: refetchRound, isFetching } = useQuery({
+        queryKey: ["change-round"],
+        queryFn: fetchChangeRound,
+        enabled: false,
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+    });
+    const handleShuffleAll = async () => {
+        const { data, error } = await refetchRound();
+
+        if (error) {
+            console.error("Failed to swap category:", error);
+        } else if (data) {
+            setRoundCategories(data.Round);
+        }
+
+        setTooltip(null);
+    };
+
     // 3. Call site — same signature as before
     const handleSwapCategory = async (type, idx) => {
-        swapTargetRef.current = { type, idx }; // set ref before refetch (sync)
+        swapTargetRef.current = { type, idx };
         setSwapping(`${type}-${idx}`);
         setTooltip(null);
 

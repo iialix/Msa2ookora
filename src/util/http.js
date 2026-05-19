@@ -119,6 +119,14 @@ export async function fetchReplacement(type) {
     const key = type === "col" ? "Column" : "Row";
     return data[key][0];
 }
+export async function fetchChangeRound() {
+    const response = await fetch("http://localhost:8080/changeXORound");
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch new round");
+    }
+    return data;
+}
 
 export async function fetchConnect4() {
     const response = await fetch("http://localhost:8080/ConnectFour");
