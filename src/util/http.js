@@ -136,3 +136,13 @@ export async function fetchConnect4() {
     }
     return data;
 }
+
+export async function fetchAllPlayers() {
+    const response = await fetch("http://localhost:8080/allPlayers");
+    const data = await response.json();
+    console.log("fetchAllPlayers raw response:", data);
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch all players");
+    }
+    return data;
+}

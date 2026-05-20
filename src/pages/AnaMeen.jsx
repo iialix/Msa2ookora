@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import "./AnaMeen.css";
-import { fetchAnaMeen } from "../util/http";
+import { fetchAnaMeen, fetchAllPlayers } from "../util/http";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 import Timer from "../components/Timer";
@@ -12,6 +12,95 @@ import GameResult from "../components/GameResult";
 const TEAMS = { A: "الفريق 1", B: "الفريق 2" };
 const PENALTY_SECONDS = 60;
 const TOTAL_ROUNDS = 3;
+function Autocomplete({ data, setAnswerText }) {
+    const [query, setQuery] = useState("");
+    const [open, setOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
+    const wrapperRef = useRef(null);
+
+    const suggestions = query.trim()
+        ? data.filter((item) =>
+              item.name.toLowerCase().includes(query.toLowerCase()),
+          )
+        : [];
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    function highlight(text, query) {
+        const idx = text.toLowerCase().indexOf(query.toLowerCase());
+        if (idx === -1) return text;
+        return (
+            <>
+                {text.slice(0, idx)}
+                <mark className="highlight">
+                    {text.slice(idx, idx + query.length)}
+                </mark>
+                {text.slice(idx + query.length)}
+            </>
+        );
+    }
+
+    function handleSelect(item) {
+        setQuery(item.name);
+        setAnswerText(item.name);
+        setOpen(false);
+        setActiveIndex(-1);
+    }
+
+    function handleKeyDown(e) {
+        if (!open || !suggestions.length) return;
+        if (e.key === "ArrowDown")
+            setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
+        if (e.key === "ArrowUp") setActiveIndex((i) => Math.max(i - 1, 0));
+        if (e.key === "Enter" && activeIndex >= 0)
+            handleSelect(suggestions[activeIndex]);
+        if (e.key === "Escape") setOpen(false);
+    }
+
+    return (
+        <div
+            ref={wrapperRef}
+            style={{ position: "relative", marginTop: 16 }}
+            dir="ltr">
+            <input
+                className="answer-input"
+                value={query}
+                onChange={(e) => {
+                    setQuery(e.target.value);
+                    setAnswerText(e.target.value);
+                    setOpen(true);
+                }}
+                onKeyDown={handleKeyDown}
+                onFocus={() => query.trim() && setOpen(true)}
+                placeholder="اكتب الإجابة هنا..."
+                autoComplete="off"
+                dir="ltr"
+            />
+
+            {open && suggestions.length > 0 && (
+                <ul className="autocomplete-dropdown">
+                    {suggestions.map((item, i) => (
+                        <li
+                            key={i}
+                            onMouseDown={() => handleSelect(item)}
+                            onMouseEnter={() => setActiveIndex(i)}
+                            className={i === activeIndex ? "active" : ""}>
+                            {highlight(item.name, query)}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
 
 export default function AnaMeen() {
     const [roundIndex, setRoundIndex] = useState(0);
@@ -37,6 +126,17 @@ export default function AnaMeen() {
     const { data, isPending, isError } = useQuery({
         queryKey: ["anaMeen"],
         queryFn: fetchAnaMeen,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+    });
+    const {
+        data: players,
+        isPending: isPendingPlayers,
+        isError: isErrorPlayers,
+    } = useQuery({
+        queryKey: ["players"],
+        queryFn: fetchAllPlayers,
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -282,15 +382,10 @@ export default function AnaMeen() {
                             })}
                         </div>
 
-                        <input
-                            className="answer-input"
-                            type="text"
-                            placeholder="اكتب الإجابة هنا..."
-                            value={answerText}
-                            onChange={(e) => setAnswerText(e.target.value)}
-                            onKeyDown={(e) =>
-                                e.key === "Enter" && submitAnswer()
-                            }
+                        <Autocomplete
+                            key={showModal}
+                            data={players || []}
+                            setAnswerText={setAnswerText}
                         />
 
                         {modalFeedback === "correct" && (
