@@ -5,6 +5,7 @@ const playerController = require('../controllers/games');
 router.get('/password', playerController.getPasswordPlayers);
 router.get('/bedonKalam', playerController.getBedonKalamPlayers);
 router.get('/changePlayer', playerController.getAnotherPlayer);
+router.get('/allPlayers', playerController.getAllPlayers);
 
 router.get('/anaMeen', playerController.getAnaMeenInfo);
 
@@ -29,19 +30,5 @@ router.get('/changeXORow', playerController.getXORow);
 router.get('/changeXORound', playerController.getXORound);
 
 router.get('/connectFour', playerController.getConnectFour);
-
-/*
-    9 rows
-    9 columns
-
-    
-    + -> 9
-    + -> 9 
-
-    2, 3, 3, 1
-
-    random
-
-*/
 
 module.exports = router;

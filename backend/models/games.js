@@ -13,6 +13,11 @@ class Player {
         if (error) throw error;
         return data;
     }
+    static async getAllPlayers() {
+        const { data, error } = await supabase.from('players').select('name');
+        if (error) throw error;
+        return data;
+    }
 
     static async getPlayers(number) {
         const { data, error } = await supabase

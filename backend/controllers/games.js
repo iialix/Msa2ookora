@@ -33,6 +33,15 @@ exports.getAnotherPlayer = async (req, res) => {
         console.log(error);
     }
 };
+exports.getAllPlayers = async (req, res) => {
+    try {
+        const players = await Player.getAllPlayers();
+        res.status(200).json(players);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch player' });
+        console.log(error);
+    }
+};
 
 exports.getAnaMeenInfo = async (req, res) => {
     try {
@@ -166,6 +175,7 @@ exports.getXOColumn = async (req, res) => {
         console.log(error);
     }
 };
+
 exports.getConnectFour = async (req, res) => {
     try {
         const { shuffledcolumns, shuffledrows } = await XO.getXOCategories(7,6);
