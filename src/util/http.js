@@ -1,5 +1,3 @@
-import { exp } from "three/tsl";
-
 export async function fetchPasswordPlayers() {
     const response = await fetch("http://localhost:8080/password");
     const data = await response.json();

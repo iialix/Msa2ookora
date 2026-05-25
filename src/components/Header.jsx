@@ -7,7 +7,7 @@ const Header = () => {
         <header className="navbar">
             <div className="logo">
                 <a href="/">
-                    <img src="/logo.png" alt="logo" />
+                    <img src="/logo.webp" alt="مساؤو كورة - الصفحة الرئيسية" />
                 </a>
             </div>
             <nav>

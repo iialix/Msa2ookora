@@ -7,10 +7,13 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 
-const formatImageUrl = (url) => url.replace(".", "../../backend");
+const formatImageUrl = (url) => url ? url.replace(".", "../../backend") : null;
 
 export default function PasswordChallenge() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [timeLeft, setTimeLeft] = useState(30);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [isActive, setIsActive] = useState(false);
@@ -22,7 +25,6 @@ export default function PasswordChallenge() {
     });
     const [gameResult, setGameResult] = useState(null);
     const [earlyWin, setEarlyWin] = useState(null);
-
     const [continued, setContinued] = useState(false);
 
     const { data, isPending, isError } = useQuery({
@@ -55,7 +57,7 @@ export default function PasswordChallenge() {
         setScores(newScores);
 
         if (newScores[team] >= 5 && !continued) {
-            const winnerName = team === "teamA" ? "الفريق 1" : "الفريق 2";
+            const winnerName = team === "teamA" ? teamA : teamB;
             setEarlyWin(winnerName);
             return;
         }
@@ -84,14 +86,17 @@ export default function PasswordChallenge() {
         } else {
             if (currentScores.teamA === currentScores.teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
             } else {
-                setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${
+                const winnerName =
+                    currentScores.teamA > currentScores.teamB ? teamA : teamB;
+                setGameResult(`انتهت اللعبة! الفائز هو: ${winnerName}`);
+                if (isTournament)
+                    reportGameResult(
                         currentScores.teamA > currentScores.teamB
-                            ? "الفريق 1"
-                            : "الفريق 2"
-                    }`,
-                );
+                            ? "teamA"
+                            : "teamB",
+                    );
             }
         }
     };
@@ -145,63 +150,65 @@ export default function PasswordChallenge() {
     }
 
     return (
-        <div className="game-container" dir="rtl">
-            {/* Early Win Popup */}
-            <EarlyWin
-                earlyWin={earlyWin}
-                scores={scores}
-                handleContinue={handleContinue}
-                handleNewGame={handleNewGame}></EarlyWin>
-
-            {/* Header */}
-            <div className="game-header">
-                <ScoreBoard
-                    isTurns={false}
-                    selectedTeam={null}
-                    round={round}
+        <TeamNameModal>
+            <div className="game-container" dir="rtl">
+                {/* Early Win Popup */}
+                <EarlyWin
+                    earlyWin={earlyWin}
                     scores={scores}
-                    totalRounds={8}></ScoreBoard>
-            </div>
+                    handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}></EarlyWin>
 
-            <div className="player-section">
-                <div className="player-card">
-                    {currentPlayer.image ? (
-                        <img
-                            src={currentPlayer.image}
-                            alt={currentPlayer.name}
-                            className="player-img"
-                        />
-                    ) : (
-                        <div className="player-img-placeholder">
-                            جاري التحميل...
-                        </div>
-                    )}
-                    <h3>{currentPlayer.name}</h3>
-                    <button className="btn-secondary" onClick={changePlayer}>
-                        تغيير اللاعب
-                    </button>
+                {/* Header */}
+                <div className="game-header">
+                    <ScoreBoard
+                        isTurns={false}
+                        selectedTeam={null}
+                        round={round}
+                        scores={scores}
+                        totalRounds={8}></ScoreBoard>
+                </div>
+
+                <div className="player-section">
+                    <div className="player-card">
+                        {currentPlayer.image ? (
+                            <img
+                                src={currentPlayer.image}
+                                alt={currentPlayer.name}
+                                className="player-img"
+                            />
+                        ) : (
+                            <div className="player-img-placeholder">
+                                جاري التحميل...
+                            </div>
+                        )}
+                        <h3>{currentPlayer.name}</h3>
+                        <button className="btn-secondary" onClick={changePlayer}>
+                            تغيير اللاعب
+                        </button>
+                    </div>
+                </div>
+
+                <div className="timer-section">
+                    <Timer time={30} currentPlayer={currentPlayer}></Timer>
+                </div>
+
+                <div className="action-section">
+                    <p>منح النقطة لـ:</p>
+                    <div className="team-buttons">
+                        <button
+                            className="btn-team a"
+                            onClick={() => addPoint("teamA")}>
+                            {teamA} (+1)
+                        </button>
+                        <button
+                            className="btn-team b"
+                            onClick={() => addPoint("teamB")}>
+                            {teamB} (+1)
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div className="timer-section">
-                <Timer time={30} currentPlayer={currentPlayer}></Timer>
-            </div>
-
-            <div className="action-section">
-                <p>منح النقطة لـ:</p>
-                <div className="team-buttons">
-                    <button
-                        className="btn-team a"
-                        onClick={() => addPoint("teamA")}>
-                        الفريق 1 (+1)
-                    </button>
-                    <button
-                        className="btn-team b"
-                        onClick={() => addPoint("teamB")}>
-                        الفريق 2 (+1)
-                    </button>
-                </div>
-            </div>
-        </div>
+        </TeamNameModal>
     );
 }

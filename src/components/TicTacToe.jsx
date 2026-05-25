@@ -4,9 +4,11 @@ import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
 import { fetchReplacement, fetchxo, fetchChangeRound } from "../util/http.js";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./TicTacToe.css";
 
-const formatImageUrl = (url) => url.replace(".", "../../backend");
+const formatImageUrl = (url) => url ? url.replace(".", "../../backend") : null;
 
 const TOTAL_ROUNDS = 3;
 const WIN_LINES = [
@@ -71,6 +73,7 @@ function initRoundState(nextStartingPlayer) {
 }
 
 export default function TicTacToe({ override }) {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [round, setRound] = useState(1);
     const [startingPlayer, setStartingPlayer] = useState(1);
     const [roundWins, setRoundWins] = useState({ p1: 0, p2: 0 });
@@ -293,9 +296,9 @@ export default function TicTacToe({ override }) {
             setRoundSummary({
                 roundWinner:
                     roundWins.p1 > roundWins.p2
-                        ? "الفريق 1"
+                        ? teamA
                         : roundWins.p2 > roundWins.p1
-                          ? "الفريق 2"
+                          ? teamB
                           : null,
                 wins: roundWins,
                 nextRound: round + 1,
@@ -317,9 +320,11 @@ export default function TicTacToe({ override }) {
         setFinalScores(scores);
         if (wins.p1 === wins.p2) {
             setGameResult("انتهت اللعبة بالتعادل!");
+            if (isTournament) reportGameResult("draw");
         } else {
-            const winner = wins.p1 > wins.p2 ? "الفريق 1" : "الفريق 2";
+            const winner = wins.p1 > wins.p2 ? teamA : teamB;
             setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+            if (isTournament) reportGameResult(wins.p1 > wins.p2 ? "teamA" : "teamB");
         }
     };
     const resolveRoundEnd = (winner, currentWins, currentRound) => {
@@ -333,11 +338,11 @@ export default function TicTacToe({ override }) {
         // Early win check — only set earlyWin, do NOT set roundSummary yet
         if (!continued && currentRound < TOTAL_ROUNDS) {
             if (newWins.p1 > newWins.p2 + roundsLeft) {
-                setEarlyWin("الفريق 1");
+                setEarlyWin(teamA);
                 return; // ← stop here, handleContinue will set roundSummary
             }
             if (newWins.p2 > newWins.p1 + roundsLeft) {
-                setEarlyWin("الفريق 2");
+                setEarlyWin(teamB);
                 return; // ← stop here
             }
         }
@@ -348,8 +353,9 @@ export default function TicTacToe({ override }) {
         }
 
         // Normal round end
+        const roundWinnerName = winner === 1 ? teamA : winner === 2 ? teamB : null;
         setRoundSummary({
-            roundWinner: winner ? `الفريق ${winner}` : null,
+            roundWinner: roundWinnerName,
             wins: newWins,
             nextRound: currentRound + 1,
         });
@@ -390,13 +396,13 @@ export default function TicTacToe({ override }) {
                     </h2>
                     <div className="summary-wins">
                         <div className="win-block p1-block">
-                            <span>✕ الفريق 1</span>
+                            <span>✕ {teamA}</span>
                             <strong>{roundSummary.wins.p1}</strong>
                             <small>انتصارات</small>
                         </div>
                         <div className="summary-divider">vs</div>
                         <div className="win-block p2-block">
-                            <span>○ الفريق 2</span>
+                            <span>○ {teamB}</span>
                             <strong>{roundSummary.wins.p2}</strong>
                             <small>انتصارات</small>
                         </div>
@@ -452,124 +458,126 @@ export default function TicTacToe({ override }) {
     };
 
     return (
-        <div
-            className="xo-container"
-            dir="rtl"
-            onClick={() => tooltip && setTooltip(null)}>
-            {round !== 3 && (
-                <EarlyWin
-                    earlyWin={earlyWin}
-                    scores={{ teamA: roundWins.p1, teamB: roundWins.p2 }}
-                    handleContinue={handleContinue}
-                    handleNewGame={handleNewGame}
-                />
-            )}
+        <TeamNameModal>
+            <div
+                className="xo-container"
+                dir="rtl"
+                onClick={() => tooltip && setTooltip(null)}>
+                {round !== 3 && (
+                    <EarlyWin
+                        earlyWin={earlyWin}
+                        scores={{ teamA: roundWins.p1, teamB: roundWins.p2 }}
+                        handleContinue={handleContinue}
+                        handleNewGame={handleNewGame}
+                    />
+                )}
 
-            {/* ── Header ── */}
-            <div className="xo-header">
-                <div
-                    className={`xo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
-                    <span className="xo-symbol">✕</span>
-                    <span>الفريق 1</span>
-                    {activePlayer === 1 && <span className="turn-dot" />}
+                {/* ── Header ── */}
+                <div className="xo-header">
+                    <div
+                        className={`xo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
+                        <span className="xo-symbol">✕</span>
+                        <span>{teamA}</span>
+                        {activePlayer === 1 && <span className="turn-dot" />}
+                    </div>
+                    <div className="xo-round-info">
+                        <span className="xo-round-label">
+                            جولة {round} / {TOTAL_ROUNDS}
+                        </span>
+                    </div>
+                    <div
+                        className={`xo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
+                        <span className="xo-symbol">○</span>
+                        <span>{teamB}</span>
+                        {activePlayer === 2 && <span className="turn-dot" />}
+                    </div>
                 </div>
-                <div className="xo-round-info">
-                    <span className="xo-round-label">
-                        جولة {round} / {TOTAL_ROUNDS}
-                    </span>
-                </div>
-                <div
-                    className={`xo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
-                    <span className="xo-symbol">○</span>
-                    <span>الفريق 2</span>
-                    {activePlayer === 2 && <span className="turn-dot" />}
-                </div>
-            </div>
 
-            <p className="xo-turn-label">
-                دور {activePlayer === 1 ? "الفريق 1 ✕" : "الفريق 2 ○"}
-            </p>
+                <p className="xo-turn-label">
+                    دور {activePlayer === 1 ? `${teamA} ✕` : `${teamB} ○`}
+                </p>
 
-            {/* ── Shuffle All Button ── */}
-            <button
-                className="shuffle-btn"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleShuffleAll();
-                }}>
-                🔀 تغيير جميع الفئات
-            </button>
-
-            {/* ── Grid ── */}
-            {currentColumns && currentRows && (
-                <div className="xo-grid">
-                    {/* Empty corner */}
-                    <div className="category-corner" />
-
-                    {/* Column headers */}
-                    {currentColumns.map((col, i) => (
-                        <CategoryButton
-                            key={`col-${i}`}
-                            cat={col}
-                            tooltipKey={`col-${i}`}
-                            type="col"
-                            idx={i}
-                        />
-                    ))}
-
-                    {/* Rows + cells — Fragment with key fixes the warning */}
-                    {currentRows.map((row, rowIdx) => (
-                        <Fragment key={`row-${rowIdx}`}>
-                            {/* Row header */}
-                            <CategoryButton
-                                cat={row}
-                                tooltipKey={`row-${rowIdx}`}
-                                type="row"
-                                idx={rowIdx}
-                            />
-
-                            {/* 3 cells for this row */}
-                            {[0, 1, 2].map((colIdx) => {
-                                const idx = rowIdx * 3 + colIdx;
-                                const cell = cells[idx];
-                                const isWinCell = winLine.includes(idx);
-                                const isFading = pendingRemove === idx;
-                                const isEmpty = cell === null;
-                                return (
-                                    <button
-                                        key={idx}
-                                        className={`xo-cell
-                                            ${isEmpty ? "empty" : ""}
-                                            ${cell?.player === 1 ? "p1" : ""}
-                                            ${cell?.player === 2 ? "p2" : ""}
-                                            ${isWinCell ? "win-cell" : ""}
-                                            ${isFading ? "fading" : ""}
-                                        `}
-                                        onClick={() => handleCellClick(idx)}
-                                        disabled={!!winResult}>
-                                        {cell?.player === 1 && (
-                                            <span className="cell-symbol">
-                                                ✕
-                                            </span>
-                                        )}
-                                        {cell?.player === 2 && (
-                                            <span className="cell-symbol">
-                                                ○
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </Fragment>
-                    ))}
-                </div>
-            )}
-
-            <div className="skip-container">
-                <button className="skip-btn" onClick={handleSkip}>
-                    skip
+                {/* ── Shuffle All Button ── */}
+                <button
+                    className="shuffle-btn"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleShuffleAll();
+                    }}>
+                    🔀 تغيير جميع الفئات
                 </button>
+
+                {/* ── Grid ── */}
+                {currentColumns && currentRows && (
+                    <div className="xo-grid">
+                        {/* Empty corner */}
+                        <div className="category-corner" />
+
+                        {/* Column headers */}
+                        {currentColumns.map((col, i) => (
+                            <CategoryButton
+                                key={`col-${i}`}
+                                cat={col}
+                                tooltipKey={`col-${i}`}
+                                type="col"
+                                idx={i}
+                            />
+                        ))}
+
+                        {/* Rows + cells — Fragment with key fixes the warning */}
+                        {currentRows.map((row, rowIdx) => (
+                            <Fragment key={`row-${rowIdx}`}>
+                                {/* Row header */}
+                                <CategoryButton
+                                    cat={row}
+                                    tooltipKey={`row-${rowIdx}`}
+                                    type="row"
+                                    idx={rowIdx}
+                                />
+
+                                {/* 3 cells for this row */}
+                                {[0, 1, 2].map((colIdx) => {
+                                    const idx = rowIdx * 3 + colIdx;
+                                    const cell = cells[idx];
+                                    const isWinCell = winLine.includes(idx);
+                                    const isFading = pendingRemove === idx;
+                                    const isEmpty = cell === null;
+                                    return (
+                                        <button
+                                            key={idx}
+                                            className={`xo-cell
+                                                ${isEmpty ? "empty" : ""}
+                                                ${cell?.player === 1 ? "p1" : ""}
+                                                ${cell?.player === 2 ? "p2" : ""}
+                                                ${isWinCell ? "win-cell" : ""}
+                                                ${isFading ? "fading" : ""}
+                                            `}
+                                            onClick={() => handleCellClick(idx)}
+                                            disabled={!!winResult}>
+                                            {cell?.player === 1 && (
+                                                <span className="cell-symbol">
+                                                    ✕
+                                                </span>
+                                            )}
+                                            {cell?.player === 2 && (
+                                                <span className="cell-symbol">
+                                                    ○
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </Fragment>
+                        ))}
+                    </div>
+                )}
+
+                <div className="skip-container">
+                    <button className="skip-btn" onClick={handleSkip}>
+                        skip
+                    </button>
+                </div>
             </div>
-        </div>
+        </TeamNameModal>
     );
 }

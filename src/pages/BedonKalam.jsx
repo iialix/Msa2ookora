@@ -8,11 +8,14 @@ import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./BedonKalam.css";
 
-const formatImageUrl = (url) => url.replace(".", "backend");
+const formatImageUrl = (url) => url ? url.replace(".", "backend") : null;
 
 export default function BedonKalam() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [selectedIndex, setSelectedIndex] = useState(null); // which button was clicked
     const [selectedTeam, setSelectedTeam] = useState(1);
     const [usedIndexes, setUsedIndexes] = useState([]); // already chosen buttons
@@ -68,7 +71,6 @@ export default function BedonKalam() {
         ]);
         setSelectedIndex(null);
         setCurrentPlayer(null);
-        // resetTurn();
 
         if (!continued) {
             const totalRounds = 10;
@@ -80,13 +82,13 @@ export default function BedonKalam() {
 
             // Check if teamA is unreachable
             if (teamAScore > teamBScore + roundsRemaining) {
-                setEarlyWin("الفريق 1");
+                setEarlyWin(teamA);
                 return;
             }
 
             // Check if teamB is unreachable
             if (teamBScore > teamAScore + roundsRemaining) {
-                setEarlyWin("الفريق 2");
+                setEarlyWin(teamB);
                 return;
             }
         }
@@ -94,12 +96,17 @@ export default function BedonKalam() {
         if (round >= 10) {
             if (currentScores.teamA === currentScores.teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
             } else {
                 const winner =
-                    currentScores.teamA > currentScores.teamB
-                        ? "الفريق 1"
-                        : "الفريق 2";
+                    currentScores.teamA > currentScores.teamB ? teamA : teamB;
                 setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                if (isTournament)
+                    reportGameResult(
+                        currentScores.teamA > currentScores.teamB
+                            ? "teamA"
+                            : "teamB",
+                    );
             }
         } else {
             setRound((r) => r + 1);
@@ -110,12 +117,16 @@ export default function BedonKalam() {
         setContinued(true);
         setEarlyWin(null);
         if (round >= 10) {
-            const { teamA, teamB } = scores;
-            if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
-            else
+            const { teamA: tA, teamB: tB } = scores;
+            if (tA === tB) {
+                setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
+            } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${teamA > teamB ? "الفريق 1" : "الفريق 2"}`,
+                    `انتهت اللعبة! الفائز هو: ${tA > tB ? teamA : teamB}`,
                 );
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
+            }
         } else {
             setRound((r) => r + 1);
         }
@@ -144,105 +155,107 @@ export default function BedonKalam() {
     }
 
     return (
-        <div className="bedon-game-container" dir="rtl">
-            {/* Early Win Popup */}
-            <EarlyWin
-                earlyWin={earlyWin}
-                scores={scores}
-                handleContinue={handleContinue}
-                handleNewGame={handleNewGame}></EarlyWin>
-
-            {/* Header */}
-            <div className="game-header">
-                <ScoreBoard
-                    isTurns={true}
-                    selectedTeam={selectedTeam}
-                    round={round}
+        <TeamNameModal>
+            <div className="bedon-game-container" dir="rtl">
+                {/* Early Win Popup */}
+                <EarlyWin
+                    earlyWin={earlyWin}
                     scores={scores}
-                    totalRounds={10}></ScoreBoard>
-            </div>
+                    handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}></EarlyWin>
 
-            {/* Player Buttons Grid */}
-            <div className="player-section">
-                <div className="bedon-buttons-grid">
-                    {data.map((player, index) => {
-                        const usedItem = usedIndexes.find(
-                            (item) => item.selectedIndex === index,
-                        );
-                        const isUsed = !!usedItem;
-                        const teamAnswered = usedItem?.teamAnswer;
-                        const isSelected = selectedIndex === index;
-                        return (
-                            <button
-                                key={player.id}
-                                className={`bedon-player-btn 
-                                ${isUsed ? "used" : ""} 
-                                ${teamAnswered === "teamA" ? "team-a" : ""} 
-                                ${teamAnswered === "teamB" ? "team-b" : ""} 
-                                ${teamAnswered === "skip" ? "skipped" : ""} 
-                                ${isSelected ? "selected" : ""}`}
-                                onClick={() => handleSelectPlayer(index)}
-                                disabled={isUsed}>
-                                {teamAnswered === "skip" && "✗"}
-                                {isUsed && !(teamAnswered === "skip") && "✓"}
-                                {!isUsed && index + 1}
-                            </button>
-                        );
-                    })}
+                {/* Header */}
+                <div className="game-header">
+                    <ScoreBoard
+                        isTurns={true}
+                        selectedTeam={selectedTeam}
+                        round={round}
+                        scores={scores}
+                        totalRounds={10}></ScoreBoard>
                 </div>
 
-                {/* Selected Player Card */}
-                {currentPlayer ? (
-                    <div className="player-card" style={{ marginTop: "20px" }}>
-                        <img
-                            src={formatImageUrl(currentPlayer.image_url)}
-                            alt={currentPlayer.name}
-                            className="player-img"
-                        />
-                        <h3>{currentPlayer.name}</h3>
+                {/* Player Buttons Grid */}
+                <div className="player-section">
+                    <div className="bedon-buttons-grid">
+                        {data.map((player, index) => {
+                            const usedItem = usedIndexes.find(
+                                (item) => item.selectedIndex === index,
+                            );
+                            const isUsed = !!usedItem;
+                            const teamAnswered = usedItem?.teamAnswer;
+                            const isSelected = selectedIndex === index;
+                            return (
+                                <button
+                                    key={player.id}
+                                    className={`bedon-player-btn 
+                                    ${isUsed ? "used" : ""} 
+                                    ${teamAnswered === "teamA" ? "team-a" : ""} 
+                                    ${teamAnswered === "teamB" ? "team-b" : ""} 
+                                    ${teamAnswered === "skip" ? "skipped" : ""} 
+                                    ${isSelected ? "selected" : ""}`}
+                                    onClick={() => handleSelectPlayer(index)}
+                                    disabled={isUsed}>
+                                    {teamAnswered === "skip" && "✗"}
+                                    {isUsed && !(teamAnswered === "skip") && "✓"}
+                                    {!isUsed && index + 1}
+                                </button>
+                            );
+                        })}
                     </div>
-                ) : (
-                    <div className="player-placeholder">
-                        <p
-                            style={{
-                                color: "rgba(255,255,255,0.4)",
-                                marginTop: "20px",
-                            }}>
-                            اختر رقماً لعرض اللاعب
-                        </p>
+
+                    {/* Selected Player Card */}
+                    {currentPlayer ? (
+                        <div className="player-card" style={{ marginTop: "20px" }}>
+                            <img
+                                src={formatImageUrl(currentPlayer.image_url)}
+                                alt={currentPlayer.name}
+                                className="player-img"
+                            />
+                            <h3>{currentPlayer.name}</h3>
+                        </div>
+                    ) : (
+                        <div className="player-placeholder">
+                            <p
+                                style={{
+                                    color: "rgba(255,255,255,0.4)",
+                                    marginTop: "20px",
+                                }}>
+                                اختر رقماً لعرض اللاعب
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Timer */}
+                <div className="timer-section">
+                    <Timer time={45} currentPlayer={currentPlayer}></Timer>
+                </div>
+
+                {/* Give Point */}
+                <div className="action-section">
+                    <p>منح النقطة لـ:</p>
+                    <div className="team-buttons">
+                        <button
+                            className="btn-team a"
+                            onClick={() => addPoint("teamA")}
+                            disabled={!currentPlayer}>
+                            {teamA} (+1)
+                        </button>
+                        <button
+                            className="btn-team b"
+                            onClick={() => addPoint("teamB")}
+                            disabled={!currentPlayer}>
+                            {teamB} (+1)
+                        </button>
+                        <button
+                            className="btn-team skip"
+                            onClick={() => addPoint("skip")}
+                            disabled={!currentPlayer}>
+                            skip
+                        </button>
                     </div>
-                )}
-            </div>
-
-            {/* Timer */}
-            <div className="timer-section">
-                <Timer time={45} currentPlayer={currentPlayer}></Timer>
-            </div>
-
-            {/* Give Point */}
-            <div className="action-section">
-                <p>منح النقطة لـ:</p>
-                <div className="team-buttons">
-                    <button
-                        className="btn-team a"
-                        onClick={() => addPoint("teamA")}
-                        disabled={!currentPlayer}>
-                        الفريق 1 (+1)
-                    </button>
-                    <button
-                        className="btn-team b"
-                        onClick={() => addPoint("teamB")}
-                        disabled={!currentPlayer}>
-                        الفريق 2 (+1)
-                    </button>
-                    <button
-                        className="btn-team skip"
-                        onClick={() => addPoint("skip")}
-                        disabled={!currentPlayer}>
-                        skip
-                    </button>
                 </div>
             </div>
-        </div>
+        </TeamNameModal>
     );
 }

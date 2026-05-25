@@ -31,11 +31,11 @@
 .logo img {
     max-width: 200px;
     display: block;
+    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo img:hover {
     transform: scale(1.05);
-    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-links {

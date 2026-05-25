@@ -6,6 +6,8 @@ import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
 import Timer from "../components/Timer";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./Offside.css";
 
 async function fetchOffside() {
@@ -18,8 +20,9 @@ async function fetchOffside() {
 }
 
 export default function Offside() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [selectedTeam, setSelectedTeam] = useState(1);
-    const [round, setRound] = useState(1); // 1-based, maps to data[round - 1]
+    const [round, setRound] = useState(1);
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
     const [gameResult, setGameResult] = useState(null);
     const [earlyWin, setEarlyWin] = useState(null);
@@ -35,19 +38,15 @@ export default function Offside() {
 
     const handleNewGame = () => window.location.reload();
 
-    // points: 2 | 1 | 0  — always awarded to the active team
     const addPoint = (points) => {
         const activeTeamKey = selectedTeam === 1 ? "teamA" : "teamB";
 
-        // 1. Update scores
         const currentScores = { ...scores };
         currentScores[activeTeamKey] = scores[activeTeamKey] + points;
         setScores(currentScores);
 
-        // 2. Switch active team
         setSelectedTeam((prev) => (prev === 1 ? 2 : 1));
 
-        // 3. Early win check — max possible remaining points = roundsRemaining * 2
         if (!continued && round < 10) {
             const roundsRemaining = 10 - round;
             let teamARemaining = 0;
@@ -59,29 +58,27 @@ export default function Offside() {
                     teamARemaining++;
                 }
             }
-            // const maxLeft = roundsRemaining / 2;
-            const { teamA, teamB } = currentScores;
+            const { teamA: tA, teamB: tB } = currentScores;
 
-            console.log("team a " + teamARemaining, "team b " + teamBRemaining);
-
-            if (teamA > teamBRemaining * 2 + teamB) {
-                setEarlyWin("الفريق 1");
+            if (tA > teamBRemaining * 2 + tB) {
+                setEarlyWin(teamA);
                 return;
             }
-            if (teamB > teamARemaining * 2 + teamA) {
-                setEarlyWin("الفريق 2");
+            if (tB > teamARemaining * 2 + tA) {
+                setEarlyWin(teamB);
                 return;
             }
         }
 
-        // 4. End or advance
         if (round >= 10) {
-            const { teamA, teamB } = currentScores;
-            if (teamA === teamB) {
+            const { teamA: tA, teamB: tB } = currentScores;
+            if (tA === tB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
             } else {
-                const winner = teamA > teamB ? "الفريق 1" : "الفريق 2";
+                const winner = tA > tB ? teamA : teamB;
                 setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
             }
         } else {
             setRound((r) => r + 1);
@@ -92,12 +89,16 @@ export default function Offside() {
         setContinued(true);
         setEarlyWin(null);
         if (round >= 10) {
-            const { teamA, teamB } = scores;
-            if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
-            else
+            const { teamA: tA, teamB: tB } = scores;
+            if (tA === tB) {
+                setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
+            } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${teamA > teamB ? "الفريق 1" : "الفريق 2"}`,
+                    `انتهت اللعبة! الفائز هو: ${tA > tB ? teamA : teamB}`,
                 );
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
+            }
         } else {
             setRound((r) => r + 1);
         }
@@ -126,74 +127,73 @@ export default function Offside() {
         );
 
     const currentQuestion = data[round - 1];
+    const activeLabel = selectedTeam === 1 ? teamA : teamB;
 
     return (
-        <div className="offside-game-container" dir="rtl">
-            <EarlyWin
-                earlyWin={earlyWin}
-                scores={scores}
-                handleContinue={handleContinue}
-                handleNewGame={handleNewGame}
-            />
-
-            {/* Header / Scoreboard */}
-            <div className="game-header">
-                <ScoreBoard
-                    isTurns={true}
-                    selectedTeam={selectedTeam}
-                    round={round}
+        <TeamNameModal>
+            <div className="offside-game-container" dir="rtl">
+                <EarlyWin
+                    earlyWin={earlyWin}
                     scores={scores}
-                    totalRounds={10}
+                    handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}
                 />
-            </div>
 
-            {/* Question Card */}
-            <div className="question-section">
-                {currentQuestion ? (
-                    <div className="question-card" key={currentQuestion.id}>
-                        <p className="question-text">
-                            {currentQuestion.question}
-                        </p>
+                <div className="game-header">
+                    <ScoreBoard
+                        isTurns={true}
+                        selectedTeam={selectedTeam}
+                        round={round}
+                        scores={scores}
+                        totalRounds={10}
+                    />
+                </div>
+
+                <div className="question-section">
+                    {currentQuestion ? (
+                        <div className="question-card" key={currentQuestion.id}>
+                            <p className="question-text">
+                                {currentQuestion.question}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="question-placeholder">
+                            <p>لا يوجد سؤال</p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="timer-section">
+                    <Timer time={10} currentPlayer={currentQuestion} />
+                </div>
+
+                <div className="action-section">
+                    <p>
+                        دور{" "}
+                        <span
+                            className={`active-team-label team-label-${selectedTeam}`}>
+                            {activeLabel}
+                        </span>
+                    </p>
+                    <div className="team-buttons">
+                        <button
+                            className="btn-team two-pts"
+                            onClick={() => addPoint(2)}>
+                            نقطتان (+2)
+                        </button>
+                        <button
+                            className="btn-team one-pt"
+                            onClick={() => addPoint(1)}>
+                            نقطة (+1)
+                        </button>
+                        <button
+                            className="btn-team zero-pts"
+                            onClick={() => addPoint(0)}>
+                            صفر (0)
+                        </button>
                     </div>
-                ) : (
-                    <div className="question-placeholder">
-                        <p>لا يوجد سؤال</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Timer — resets each round via key */}
-            <div className="timer-section">
-                <Timer time={10} currentPlayer={currentQuestion} />
-            </div>
-
-            {/* Award Points */}
-            <div className="action-section">
-                <p>
-                    دور{" "}
-                    <span
-                        className={`active-team-label team-label-${selectedTeam}`}>
-                        الفريق {selectedTeam}
-                    </span>
-                </p>
-                <div className="team-buttons">
-                    <button
-                        className="btn-team two-pts"
-                        onClick={() => addPoint(2)}>
-                        نقطتان (+2)
-                    </button>
-                    <button
-                        className="btn-team one-pt"
-                        onClick={() => addPoint(1)}>
-                        نقطة (+1)
-                    </button>
-                    <button
-                        className="btn-team zero-pts"
-                        onClick={() => addPoint(0)}>
-                        صفر (0)
-                    </button>
                 </div>
             </div>
-        </div>
+        </TeamNameModal>
     );
 }

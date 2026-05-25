@@ -1,0 +1,6 @@
+# robots.txt for مساؤو كورة
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: /sitemap.xml

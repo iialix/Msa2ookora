@@ -8,8 +8,9 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import EarlyWin from "../components/EarlyWin";
 import GameResult from "../components/GameResult";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 
-const TEAMS = { A: "الفريق 1", B: "الفريق 2" };
 const PENALTY_SECONDS = 60;
 const TOTAL_ROUNDS = 3;
 function Autocomplete({ data, setAnswerText }) {
@@ -103,6 +104,9 @@ function Autocomplete({ data, setAnswerText }) {
 }
 
 export default function AnaMeen() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
+    const TEAMS = { A: teamA, B: teamB };
+
     const [roundIndex, setRoundIndex] = useState(0);
     const [clueIndex, setClueIndex] = useState(0); // 0–4
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
@@ -173,10 +177,6 @@ export default function AnaMeen() {
     const getClues = (q) => [q.clue1, q.clue2, q.clue3, q.clue4, q.clue5];
     const clues = current ? getClues(current) : [];
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
-    // Disabled on the clue they answered wrong AND the next clue only
-    // Free again from wrongClue+2 onward
     function isTeamDisabled(teamKey) {
         const lastWrong = wrongOnClue[teamKey];
         if (lastWrong === -1) return false;
@@ -189,15 +189,10 @@ export default function AnaMeen() {
     }
 
     function shouldShowPenalty(teamKey) {
-        const lastWrong = wrongOnClue[teamKey];
-        const otherKey = teamKey === "teamA" ? "teamB" : "teamA";
-
         const hasTimePenalty = penalties[teamKey] > 0;
-
         return hasTimePenalty;
     }
 
-    // Hide the answer button entirely when both teams are still in penalty
     const bothDisabled = isTeamDisabled("teamA") && isTeamDisabled("teamB");
 
     function openModal() {
@@ -239,19 +234,15 @@ export default function AnaMeen() {
         } else {
             setModalFeedback("wrong");
 
-            // Mark which clue this team got wrong (for lockout logic)
             setWrongOnClue((prev) => ({ ...prev, [key]: clueIndex }));
 
-            // Penalty logic:
-            // - Remove other team's penalty if they had one (they're freed)
-            // - Only assign 60s penalty on the last clue (index 4)
             setPenalties((prev) => {
                 const newPenalties = { ...prev };
                 if (newPenalties[otherKey] > 0) {
-                    newPenalties[otherKey] = 0; // free the other team
+                    newPenalties[otherKey] = 0;
                 }
                 if (clueIndex === 4) {
-                    newPenalties[key] = PENALTY_SECONDS; // penalize only on last clue
+                    newPenalties[key] = PENALTY_SECONDS;
                 }
                 return newPenalties;
             });
@@ -266,7 +257,6 @@ export default function AnaMeen() {
         setReset(Math.random() + 1);
 
         setWrongOnClue((prev) => {
-            // If both teams were wrong on the same clue → reset both
             if (
                 prev.teamA !== -1 &&
                 prev.teamA === prev.teamB &&
@@ -311,12 +301,16 @@ export default function AnaMeen() {
     function handleNextRound() {
         const nextIndex = roundIndex + 1;
         if (nextIndex >= TOTAL_ROUNDS) {
-            const { teamA, teamB } = scores;
-            if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
-            else
+            const { teamA: tA, teamB: tB } = scores;
+            if (tA === tB) {
+                setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
+            } else {
                 setGameResult(
-                    `انتهت اللعبة! الفائز هو: ${teamA > teamB ? TEAMS.A : TEAMS.B}`,
+                    `انتهت اللعبة! الفائز هو: ${tA > tB ? TEAMS.A : TEAMS.B}`,
                 );
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
+            }
         } else {
             setRoundIndex(nextIndex);
             setClueIndex(0);
@@ -329,7 +323,7 @@ export default function AnaMeen() {
 
     const handleContinue = () => {
         setEarlyWin(null);
-        nextRound(scores);
+        handleNextRound();
     };
 
     // ── Game Over Screen ──────────────────────────────────────────────────────
@@ -344,163 +338,165 @@ export default function AnaMeen() {
 
     // ── Main Game ─────────────────────────────────────────────────────────────
     return (
-        <div className="ana-meen-game-container" dir="rtl">
-            <EarlyWin
-                earlyWin={earlyWin}
-                scores={scores}
-                handleContinue={handleContinue}
-                handleNewGame={handleNewGame}></EarlyWin>
-            {/* ── Answer Modal ── */}
-            {showModal && (
-                <div className="popup-overlay">
-                    <div className="popup-box">
-                        <h2>من هو؟</h2>
-                        <p>اختر الفريق وأدخل الإجابة</p>
-
-                        <div className="team-buttons">
-                            {["A", "B"].map((t) => {
-                                const key = t === "A" ? "teamA" : "teamB";
-                                const disabled = isTeamDisabled(key);
-                                const showPenalty = shouldShowPenalty(key);
-                                return (
-                                    <button
-                                        key={t}
-                                        className={`btn-team ${t === "A" ? "a" : "b"} ${selectedTeam === t ? "selected" : ""} ${disabled ? "disabled-penalty" : ""}`}
-                                        onClick={() =>
-                                            !disabled && setSelectedTeam(t)
-                                        }
-                                        disabled={disabled}>
-                                        {TEAMS[t]}
-                                        {showPenalty && (
-                                            <span className="penalty-timer">
-                                                {" "}
-                                                ({penalties[key]}ث)
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <Autocomplete
-                            key={showModal}
-                            data={players || []}
-                            setAnswerText={setAnswerText}
-                        />
-
-                        {modalFeedback === "correct" && (
-                            <div className="feedback correct">
-                                ✅ إجابة صحيحة!
-                            </div>
-                        )}
-                        {modalFeedback === "wrong" && (
-                            <div className="feedback wrong">
-                                ❌ إجابة خاطئة!
-                            </div>
-                        )}
-
-                        <div
-                            className="popup-buttons"
-                            style={{ marginTop: 16 }}>
-                            <button
-                                className="btn-primary"
-                                onClick={submitAnswer}
-                                disabled={!selectedTeam || !answerText.trim()}>
-                                تأكيد الإجابة
-                            </button>
-                            <button
-                                className="btn-secondary"
-                                onClick={closeModal}>
-                                إغلاق
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Header ── */}
-            <div className="game-header">
-                <ScoreBoard
-                    isTurns={false}
-                    selectedTeam={null}
-                    round={roundIndex + 1}
+        <TeamNameModal>
+            <div className="ana-meen-game-container" dir="rtl">
+                <EarlyWin
+                    earlyWin={earlyWin}
                     scores={scores}
-                    totalRounds={3}></ScoreBoard>
-            </div>
+                    handleContinue={handleContinue}
+                    handleNewGame={handleNewGame}></EarlyWin>
+                {/* ── Answer Modal ── */}
+                {showModal && (
+                    <div className="popup-overlay">
+                        <div className="popup-box">
+                            <h2>من هو؟</h2>
+                            <p>اختر الفريق وأدخل الإجابة</p>
 
-            {/* ── Clues Section ── */}
-            <div className="clues-section">
-                <h3 className="clues-title">الأدلة</h3>
-                <div className="clues-list">
-                    {clues.slice(0, clueIndex + 1).map((clue, i) => (
-                        <div key={i} className="clue-item">
-                            <span className="clue-number">{i + 1}</span>
-                            <span className="clue-text">{clue}</span>
+                            <div className="team-buttons">
+                                {["A", "B"].map((t) => {
+                                    const key = t === "A" ? "teamA" : "teamB";
+                                    const disabled = isTeamDisabled(key);
+                                    const showPenalty = shouldShowPenalty(key);
+                                    return (
+                                        <button
+                                            key={t}
+                                            className={`btn-team ${t === "A" ? "a" : "b"} ${selectedTeam === t ? "selected" : ""} ${disabled ? "disabled-penalty" : ""}`}
+                                            onClick={() =>
+                                                !disabled && setSelectedTeam(t)
+                                            }
+                                            disabled={disabled}>
+                                            {TEAMS[t]}
+                                            {showPenalty && (
+                                                <span className="penalty-timer">
+                                                    {" "}
+                                                    ({penalties[key]}ث)
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <Autocomplete
+                                key={showModal}
+                                data={players || []}
+                                setAnswerText={setAnswerText}
+                            />
+
+                            {modalFeedback === "correct" && (
+                                <div className="feedback correct">
+                                    ✅ إجابة صحيحة!
+                                </div>
+                            )}
+                            {modalFeedback === "wrong" && (
+                                <div className="feedback wrong">
+                                    ❌ إجابة خاطئة!
+                                </div>
+                            )}
+
+                            <div
+                                className="popup-buttons"
+                                style={{ marginTop: 16 }}>
+                                <button
+                                    className="btn-primary"
+                                    onClick={submitAnswer}
+                                    disabled={!selectedTeam || !answerText.trim()}>
+                                    تأكيد الإجابة
+                                </button>
+                                <button
+                                    className="btn-secondary"
+                                    onClick={closeModal}>
+                                    إغلاق
+                                </button>
+                            </div>
                         </div>
-                    ))}
+                    </div>
+                )}
+
+                {/* ── Header ── */}
+                <div className="game-header">
+                    <ScoreBoard
+                        isTurns={false}
+                        selectedTeam={null}
+                        round={roundIndex + 1}
+                        scores={scores}
+                        totalRounds={3}></ScoreBoard>
                 </div>
 
-                {showAnswer && (
-                    <div className="answer-reveal">
-                        <span className="answer-label">الإجابة:</span>
-                        <span className="answer-name">{current.name}</span>
+                {/* ── Clues Section ── */}
+                <div className="clues-section">
+                    <h3 className="clues-title">الأدلة</h3>
+                    <div className="clues-list">
+                        {clues.slice(0, clueIndex + 1).map((clue, i) => (
+                            <div key={i} className="clue-item">
+                                <span className="clue-number">{i + 1}</span>
+                                <span className="clue-text">{clue}</span>
+                            </div>
+                        ))}
                     </div>
-                )}
+
+                    {showAnswer && (
+                        <div className="answer-reveal">
+                            <span className="answer-label">الإجابة:</span>
+                            <span className="answer-name">{current.name}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Action Section ── */}
+                <div className="action-section">
+                    {/* Timer */}
+                    {!roundOver && !isRevealing && (
+                        <div className="timer-section">
+                            <Timer
+                                time={60}
+                                currentPlayer={roundIndex + 1}
+                                reset={reset}></Timer>
+                        </div>
+                    )}
+
+                    <div className="action-divider" />
+
+                    {/* Next Clue */}
+                    {!roundOver && clueIndex < 4 && (
+                        <button
+                            className="btn-primary"
+                            onClick={handleNextClue}
+                            disabled={isRevealing}>
+                            الدليل التالي ({clueIndex + 1}/5)
+                        </button>
+                    )}
+
+                    {/* Answer Button */}
+                    {!roundOver && !bothDisabled && (
+                        <button
+                            className="btn-team a full-width"
+                            onClick={openModal}
+                            disabled={isRevealing}>
+                            الإجابة
+                        </button>
+                    )}
+
+                    {/* Reveal Answer */}
+                    {!roundOver && (
+                        <button
+                            className="btn-secondary"
+                            onClick={handleRevealAnswer}
+                            disabled={isRevealing}>
+                            {isRevealing ? "جاري الكشف..." : "إظهار الإجابة"}
+                        </button>
+                    )}
+
+                    {/* Next Round */}
+                    {roundOver && (
+                        <button className="btn-primary" onClick={handleNextRound}>
+                            {roundIndex + 1 >= TOTAL_ROUNDS
+                                ? "عرض النتيجة النهائية"
+                                : "الجولة التالية ←"}
+                        </button>
+                    )}
+                </div>
             </div>
-
-            {/* ── Action Section ── */}
-            <div className="action-section">
-                {/* Timer */}
-                {!roundOver && !isRevealing && (
-                    <div className="timer-section">
-                        <Timer
-                            time={60}
-                            currentPlayer={roundIndex + 1}
-                            reset={reset}></Timer>
-                    </div>
-                )}
-
-                <div className="action-divider" />
-
-                {/* Next Clue */}
-                {!roundOver && clueIndex < 4 && (
-                    <button
-                        className="btn-primary"
-                        onClick={handleNextClue}
-                        disabled={isRevealing}>
-                        الدليل التالي ({clueIndex + 1}/5)
-                    </button>
-                )}
-
-                {/* Answer Button — hidden when both teams are in penalty */}
-                {!roundOver && !bothDisabled && (
-                    <button
-                        className="btn-team a full-width"
-                        onClick={openModal}
-                        disabled={isRevealing}>
-                        الإجابة
-                    </button>
-                )}
-
-                {/* Reveal Answer */}
-                {!roundOver && (
-                    <button
-                        className="btn-secondary"
-                        onClick={handleRevealAnswer}
-                        disabled={isRevealing}>
-                        {isRevealing ? "جاري الكشف..." : "إظهار الإجابة"}
-                    </button>
-                )}
-
-                {/* Next Round */}
-                {roundOver && (
-                    <button className="btn-primary" onClick={handleNextRound}>
-                        {roundIndex + 1 >= TOTAL_ROUNDS
-                            ? "عرض النتيجة النهائية"
-                            : "الجولة التالية ←"}
-                    </button>
-                )}
-            </div>
-        </div>
+        </TeamNameModal>
     );
 }

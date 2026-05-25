@@ -4,6 +4,8 @@ import { fetchInfinity } from "../util/http";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./Infinityxo.css";
 
 const TOTAL_ROUNDS = 3;
@@ -43,6 +45,7 @@ function initRoundState() {
 }
 
 export default function Infinityinfinityxo() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [round, setRound] = useState(1);
     const [roundWins, setRoundWins] = useState({ p1: 0, p2: 0 });
     // Global question index across all rounds (into the full question bank)
@@ -218,11 +221,11 @@ export default function Infinityinfinityxo() {
         const roundsLeft = TOTAL_ROUNDS - currentRound;
         if (!continued) {
             if (newWins.p1 > newWins.p2 + roundsLeft) {
-                setEarlyWin("الفريق 1");
+                setEarlyWin(teamA);
                 return;
             }
             if (newWins.p2 > newWins.p1 + roundsLeft) {
-                setEarlyWin("الفريق 2");
+                setEarlyWin(teamB);
                 return;
             }
         }
@@ -232,8 +235,9 @@ export default function Infinityinfinityxo() {
             return;
         }
 
+        const roundWinnerName = winner === 1 ? teamA : winner === 2 ? teamB : null;
         setRoundSummary({
-            roundWinner: winner ? `الفريق ${winner}` : null,
+            roundWinner: roundWinnerName,
             wins: newWins,
             nextRound: currentRound + 1,
         });
@@ -244,9 +248,11 @@ export default function Infinityinfinityxo() {
         setFinalScores(scores);
         if (wins.p1 === wins.p2) {
             setGameResult("انتهت اللعبة بالتعادل!");
+            if (isTournament) reportGameResult("draw");
         } else {
-            const winner = wins.p1 > wins.p2 ? "الفريق 1" : "الفريق 2";
+            const winner = wins.p1 > wins.p2 ? teamA : teamB;
             setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+            if (isTournament) reportGameResult(wins.p1 > wins.p2 ? "teamA" : "teamB");
         }
     };
 
@@ -308,13 +314,13 @@ export default function Infinityinfinityxo() {
                     </h2>
                     <div className="summary-wins">
                         <div className="win-block p1-block">
-                            <span>✕ الفريق 1</span>
+                            <span>✕ {teamA}</span>
                             <strong>{roundSummary.wins.p1}</strong>
                             <small>انتصارات</small>
                         </div>
                         <div className="summary-divider">vs</div>
                         <div className="win-block p2-block">
-                            <span>○ الفريق 2</span>
+                            <span>○ {teamB}</span>
                             <strong>{roundSummary.wins.p2}</strong>
                             <small>انتصارات</small>
                         </div>
@@ -336,134 +342,136 @@ export default function Infinityinfinityxo() {
     const winLine = winResult?.line || [];
 
     return (
-        <div className="infinityxo-container" dir="rtl">
-            {round !== 3 && (
-                <EarlyWin
-                    earlyWin={earlyWin}
-                    scores={{ teamA: roundWins.p1, teamB: roundWins.p2 }}
-                    handleContinue={handleContinue}
-                    handleNewGame={handleNewGame}
-                />
-            )}
+        <TeamNameModal>
+            <div className="infinityxo-container" dir="rtl">
+                {round !== 3 && (
+                    <EarlyWin
+                        earlyWin={earlyWin}
+                        scores={{ teamA: roundWins.p1, teamB: roundWins.p2 }}
+                        handleContinue={handleContinue}
+                        handleNewGame={handleNewGame}
+                    />
+                )}
 
-            {/* ── Header ── */}
-            <div className="infinityxo-header">
-                <div
-                    className={`infinityxo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
-                    <span className="infinityxo-symbol">✕</span>
-                    <span>الفريق 1</span>
-                    {activePlayer === 1 && <span className="turn-dot" />}
-                </div>
-                <div className="infinityxo-round-info">
-                    <span className="infinityxo-round-label">
-                        جولة {round} / {TOTAL_ROUNDS}
-                    </span>
-                    <div className="infinityxo-wins-row">
-                        <span className="wins-p1">{roundWins.p1} ✕</span>
-                        <span className="wins-sep">—</span>
-                        <span className="wins-p2">○ {roundWins.p2}</span>
-                    </div>
-                </div>
-                <div
-                    className={`infinityxo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
-                    <span className="infinityxo-symbol">○</span>
-                    <span>الفريق 2</span>
-                    {activePlayer === 2 && <span className="turn-dot" />}
-                </div>
-            </div>
-
-            <p className="infinityxo-turn-label">
-                دور {activePlayer === 1 ? "الفريق 1 ✕" : "الفريق 2 ○"}
-            </p>
-
-            {/* ── Grid ── */}
-            <div className="infinityxo-grid">
-                {cells.map((cell, idx) => {
-                    const isWinCell = winLine.includes(idx);
-                    const isFading = pendingRemove === idx;
-                    const isEmpty = cell === null;
-
-                    const playerCells = cells
-                        .map((c, i) => ({ c, i }))
-                        .filter(({ c }) => c?.player === activePlayer)
-                        .sort((a, b) => a.c.order - b.c.order);
-                    const isOldest =
-                        !isEmpty &&
-                        cell?.player === activePlayer &&
-                        playerCells.length >= 3 &&
-                        playerCells[0]?.i === idx &&
-                        !modal;
-
-                    return (
-                        <button
-                            key={idx}
-                            className={`infinityxo-cell
-                                ${isEmpty ? "empty" : ""}
-                                ${cell?.player === 1 ? "p1" : ""}
-                                ${cell?.player === 2 ? "p2" : ""}
-                                ${isWinCell ? "win-cell" : ""}
-                                ${isFading && !isWinCell ? "fading" : ""}
-                                ${isOldest && !isWinCell ? "oldest" : ""}
-                            `}
-                            onClick={() => handleCellClick(idx)}
-                            disabled={!!modal || !!winResult}>
-                            {cell?.player === 1 && (
-                                <span className="cell-symbol">✕</span>
-                            )}
-                            {cell?.player === 2 && (
-                                <span className="cell-symbol">○</span>
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Shows remaining questions for the CURRENT round only */}
-            <p className="infinityxo-questions-left">
-                أسئلة متبقية: {QUESTIONS_PER_ROUND - roundQuestionCount}
-            </p>
-
-            {/* ── Question Modal ── */}
-            {modal && (
-                <div className="infinityxo-overlay">
+                {/* ── Header ── */}
+                <div className="infinityxo-header">
                     <div
-                        className={`infinityxo-modal ${activePlayer === 1 ? "modal-p1" : "modal-p2"}`}
-                        dir="rtl">
-                        <div className="modal-player-tag">
-                            {activePlayer === 1 ? "✕ الفريق 1" : "○ الفريق 2"}
+                        className={`infinityxo-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
+                        <span className="infinityxo-symbol">✕</span>
+                        <span>{teamA}</span>
+                        {activePlayer === 1 && <span className="turn-dot" />}
+                    </div>
+                    <div className="infinityxo-round-info">
+                        <span className="infinityxo-round-label">
+                            جولة {round} / {TOTAL_ROUNDS}
+                        </span>
+                        <div className="infinityxo-wins-row">
+                            <span className="wins-p1">{roundWins.p1} ✕</span>
+                            <span className="wins-sep">—</span>
+                            <span className="wins-p2">○ {roundWins.p2}</span>
                         </div>
-                        <p className="infinityxo-modal-question">
-                            {modal.question}
-                        </p>
-                        <div className="infinityxo-choices">
-                            {modal.shuffledChoices.map((choice, i) => {
-                                let state = "";
-                                if (answered && choice === modal.answer)
-                                    state = "correct";
-                                else if (answered && choice === selected)
-                                    state = "wrong";
-                                return (
-                                    <button
-                                        key={i}
-                                        className={`infinityxo-choice ${state} ${answered ? "locked" : ""}`}
-                                        onClick={() =>
-                                            handleChoiceClick(choice)
-                                        }
-                                        disabled={answered}>
-                                        {choice}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        {answered && (
-                            <p
-                                className={`infinityxo-result-msg ${correct ? "correct-msg" : "wrong-msg"}`}>
-                                {correct ? "✓ إجابة صحيحة!" : "✗ إجابة خاطئة"}
-                            </p>
-                        )}
+                    </div>
+                    <div
+                        className={`infinityxo-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
+                        <span className="infinityxo-symbol">○</span>
+                        <span>{teamB}</span>
+                        {activePlayer === 2 && <span className="turn-dot" />}
                     </div>
                 </div>
-            )}
-        </div>
+
+                <p className="infinityxo-turn-label">
+                    دور {activePlayer === 1 ? `${teamA} ✕` : `${teamB} ○`}
+                </p>
+
+                {/* ── Grid ── */}
+                <div className="infinityxo-grid">
+                    {cells.map((cell, idx) => {
+                        const isWinCell = winLine.includes(idx);
+                        const isFading = pendingRemove === idx;
+                        const isEmpty = cell === null;
+
+                        const playerCells = cells
+                            .map((c, i) => ({ c, i }))
+                            .filter(({ c }) => c?.player === activePlayer)
+                            .sort((a, b) => a.c.order - b.c.order);
+                        const isOldest =
+                            !isEmpty &&
+                            cell?.player === activePlayer &&
+                            playerCells.length >= 3 &&
+                            playerCells[0]?.i === idx &&
+                            !modal;
+
+                        return (
+                            <button
+                                key={idx}
+                                className={`infinityxo-cell
+                                    ${isEmpty ? "empty" : ""}
+                                    ${cell?.player === 1 ? "p1" : ""}
+                                    ${cell?.player === 2 ? "p2" : ""}
+                                    ${isWinCell ? "win-cell" : ""}
+                                    ${isFading && !isWinCell ? "fading" : ""}
+                                    ${isOldest && !isWinCell ? "oldest" : ""}
+                                `}
+                                onClick={() => handleCellClick(idx)}
+                                disabled={!!modal || !!winResult}>
+                                {cell?.player === 1 && (
+                                    <span className="cell-symbol">✕</span>
+                                )}
+                                {cell?.player === 2 && (
+                                    <span className="cell-symbol">○</span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Shows remaining questions for the CURRENT round only */}
+                <p className="infinityxo-questions-left">
+                    أسئلة متبقية: {QUESTIONS_PER_ROUND - roundQuestionCount}
+                </p>
+
+                {/* ── Question Modal ── */}
+                {modal && (
+                    <div className="infinityxo-overlay">
+                        <div
+                            className={`infinityxo-modal ${activePlayer === 1 ? "modal-p1" : "modal-p2"}`}
+                            dir="rtl">
+                            <div className="modal-player-tag">
+                                {activePlayer === 1 ? `✕ ${teamA}` : `○ ${teamB}`}
+                            </div>
+                            <p className="infinityxo-modal-question">
+                                {modal.question}
+                            </p>
+                            <div className="infinityxo-choices">
+                                {modal.shuffledChoices.map((choice, i) => {
+                                    let state = "";
+                                    if (answered && choice === modal.answer)
+                                        state = "correct";
+                                    else if (answered && choice === selected)
+                                        state = "wrong";
+                                    return (
+                                        <button
+                                            key={i}
+                                            className={`infinityxo-choice ${state} ${answered ? "locked" : ""}`}
+                                            onClick={() =>
+                                                handleChoiceClick(choice)
+                                            }
+                                            disabled={answered}>
+                                            {choice}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {answered && (
+                                <p
+                                    className={`infinityxo-result-msg ${correct ? "correct-msg" : "wrong-msg"}`}>
+                                    {correct ? "✓ إجابة صحيحة!" : "✗ إجابة خاطئة"}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </TeamNameModal>
     );
 }

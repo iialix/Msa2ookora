@@ -1,6 +1,11 @@
 import "./GameResult.css";
+import { useTeam } from "../context/TeamContext";
+import { useNavigate } from "react-router-dom";
 
 export default function GameResult({ gameResult, scores, handleNewGame }) {
+    const { teamA, teamB, isPlayingTournamentGame, exitTournamentGame } = useTeam();
+    const navigate = useNavigate();
+
     let winner = "";
 
     if (scores.teamA > scores.teamB) {
@@ -10,6 +15,11 @@ export default function GameResult({ gameResult, scores, handleNewGame }) {
     } else {
         winner = "draw";
     }
+
+    const handleTournamentNext = () => {
+        exitTournamentGame();
+        navigate("/tournament");
+    };
 
     return (
         <div className="game-result-container" dir="rtl">
@@ -21,7 +31,7 @@ export default function GameResult({ gameResult, scores, handleNewGame }) {
                         className={`result-box teamA ${
                             winner === "teamA" ? "active" : ""
                         }`}>
-                        <span>الفريق 1</span>
+                        <span>{teamA}</span>
                         <strong>{scores.teamA}</strong>
                     </div>
 
@@ -29,16 +39,24 @@ export default function GameResult({ gameResult, scores, handleNewGame }) {
                         className={`result-box teamB ${
                             winner === "teamB" ? "active" : ""
                         }`}>
-                        <span>الفريق 2</span>
+                        <span>{teamB}</span>
                         <strong>{scores.teamB}</strong>
                     </div>
                 </div>
 
-                <button
-                    className="btn-primary playAgain"
-                    onClick={handleNewGame}>
-                    العب مجدداً
-                </button>
+                {isPlayingTournamentGame ? (
+                    <button
+                        className="btn-primary playAgain"
+                        onClick={handleTournamentNext}>
+                        العودة للبطولة 🏆
+                    </button>
+                ) : (
+                    <button
+                        className="btn-primary playAgain"
+                        onClick={handleNewGame}>
+                        العب مجدداً
+                    </button>
+                )}
             </div>
         </div>
     );

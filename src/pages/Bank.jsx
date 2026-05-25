@@ -5,6 +5,8 @@ import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./Bank.css";
 
 const QUESTIONS_PER_ROUND = 12;
@@ -18,6 +20,7 @@ function streakToPoints(streak) {
 }
 
 export default function Bank() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [round, setRound] = useState(0);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [streak, setStreak] = useState(0); // consecutive correct answers
@@ -39,7 +42,7 @@ export default function Bank() {
     const handleNewGame = () => window.location.reload();
 
     const activeTeam = round % 2 === 0 ? "teamA" : "teamB";
-    const activeTeamLabel = activeTeam === "teamA" ? "الفريق 1" : "الفريق 2";
+    const activeTeamLabel = activeTeam === "teamA" ? teamA : teamB;
     const teamRound = Math.floor(round / 2) + 1; // which of the 3 rounds for this team
 
     // Slice the 12 questions for this round from fetched data
@@ -100,18 +103,23 @@ export default function Bank() {
         const nextRound = round + 1;
         if (nextRound >= TOTAL_ROUNDS) {
             // Game over
-            const { teamA, teamB } = scores;
-            if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
-            else {
-                const winner = teamA > teamB ? "الفريق 1" : "الفريق 2";
+            const { teamA: tA, teamB: tB } = scores;
+            if (tA === tB) {
+                setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
+            } else {
+                const winner = tA > tB ? teamA : teamB;
                 setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
             }
         } else {
+            const nextTeamLabel = nextRound % 2 === 0 ? teamA : teamB;
             setRoundSummary({
                 finishedTeam: activeTeamLabel,
                 finishedTeamRound: teamRound,
-                nextTeam: nextRound % 2 === 0 ? "الفريق 1" : "الفريق 2",
+                nextTeam: nextTeamLabel,
                 nextTeamRound: Math.floor(nextRound / 2) + 1,
+                nextIsTeamA: nextRound % 2 === 0,
                 scores,
             });
         }
@@ -161,12 +169,12 @@ export default function Bank() {
                     <h2>انتهى دور {roundSummary.finishedTeam}</h2>
                     <div className="summary-scores">
                         <div className="summary-score team-a-score">
-                            <span>الفريق 1</span>
+                            <span>{teamA}</span>
                             <strong>{roundSummary.scores.teamA}</strong>
                         </div>
                         <div className="summary-divider">vs</div>
                         <div className="summary-score team-b-score">
-                            <span>الفريق 2</span>
+                            <span>{teamB}</span>
                             <strong>{roundSummary.scores.teamB}</strong>
                         </div>
                     </div>
@@ -174,7 +182,7 @@ export default function Bank() {
                         الدور القادم:{" "}
                         <span
                             className={
-                                roundSummary.nextTeam === "الفريق 1"
+                                roundSummary.nextIsTeamA
                                     ? "team-a-text"
                                     : "team-b-text"
                             }>
@@ -193,99 +201,101 @@ export default function Bank() {
     }
 
     return (
-        <div className="bank-game-container" dir="rtl">
-            {/* ── Header ── */}
-            <div className="bank-header">
-                <ScoreBoard
-                    isTurns={true}
-                    selectedTeam={activeTeam === "teamA" ? 1 : 2}
-                    round={round + 1}
-                    scores={scores}
-                    totalRounds={TOTAL_ROUNDS}
-                />
-                <div className="round-info">
-                    <span
-                        className={`active-badge ${activeTeam === "teamA" ? "team-a-badge" : "team-b-badge"}`}>
-                        {activeTeamLabel} — جولة {teamRound} / {ROUNDS_PER_TEAM}
-                    </span>
-                    <span className="question-progress">
-                        سؤال {questionIndex + 1} / {QUESTIONS_PER_ROUND}
-                    </span>
-                </div>
-            </div>
-
-            {/* ── Counter + Bank ── */}
-            <div className="bank-counter-section">
-                <div className="counter-display">
-                    <span className="counter-label">النقاط المعلقة</span>
-                    <span className="counter-value">{counter}</span>
-                </div>
-                <button
-                    className="btn-bank"
-                    onClick={handleBank}
-                    disabled={counter === 0 || roundEnded}>
-                    🏦 بنك!
-                </button>
-            </div>
-
-            {/* ── Question Card ── */}
-            <div className="bank-question-section">
-                {currentQuestion ? (
-                    <div
-                        className="bank-question-card"
-                        key={currentQuestion.id}>
-                        <p className="bank-question-text">
-                            {currentQuestion.question}
-                        </p>
-                        <div className="bank-answer">
-                            <span className="answer-label">الإجابة:</span>
-                            <span className="answer-text">
-                                {currentQuestion.answer}
-                            </span>
-                        </div>
+        <TeamNameModal>
+            <div className="bank-game-container" dir="rtl">
+                {/* ── Header ── */}
+                <div className="bank-header">
+                    <ScoreBoard
+                        isTurns={true}
+                        selectedTeam={activeTeam === "teamA" ? 1 : 2}
+                        round={round + 1}
+                        scores={scores}
+                        totalRounds={TOTAL_ROUNDS}
+                    />
+                    <div className="round-info">
+                        <span
+                            className={`active-badge ${activeTeam === "teamA" ? "team-a-badge" : "team-b-badge"}`}>
+                            {activeTeamLabel} — جولة {teamRound} / {ROUNDS_PER_TEAM}
+                        </span>
+                        <span className="question-progress">
+                            سؤال {questionIndex + 1} / {QUESTIONS_PER_ROUND}
+                        </span>
                     </div>
-                ) : (
-                    <div className="bank-question-card">
-                        <p style={{ color: "rgba(255,255,255,0.4)" }}>
-                            لا يوجد سؤال
-                        </p>
-                    </div>
-                )}
-            </div>
+                </div>
 
-            {/* ── Action Buttons ── */}
-            <div className="bank-action-section">
-                {roundEnded || questionIndex >= QUESTIONS_PER_ROUND ? (
-                    <button className="btn-end-round" onClick={endRound}>
-                        انهاء الجولة
+                {/* ── Counter + Bank ── */}
+                <div className="bank-counter-section">
+                    <div className="counter-display">
+                        <span className="counter-label">النقاط المعلقة</span>
+                        <span className="counter-value">{counter}</span>
+                    </div>
+                    <button
+                        className="btn-bank"
+                        onClick={handleBank}
+                        disabled={counter === 0 || roundEnded}>
+                        🏦 بنك!
                     </button>
-                ) : (
-                    <div className="answer-buttons">
-                        <button
-                            className="btn-correct"
-                            onClick={handleCorrect}
-                            disabled={!currentQuestion}>
-                            ✓ صح
-                        </button>
-                        <button
-                            className="btn-wrong"
-                            onClick={handleWrong}
-                            disabled={!currentQuestion}>
-                            ✗ خطأ
-                        </button>
-                    </div>
-                )}
-            </div>
+                </div>
 
-            {/* ── Timer ── */}
-            <div className="bank-timer-section">
-                <Timer
-                    time={120}
-                    currentPlayer={true}
-                    reset={timerKey}
-                    onEnd={handleTimerEnd}
-                />
+                {/* ── Question Card ── */}
+                <div className="bank-question-section">
+                    {currentQuestion ? (
+                        <div
+                            className="bank-question-card"
+                            key={currentQuestion.id}>
+                            <p className="bank-question-text">
+                                {currentQuestion.question}
+                            </p>
+                            <div className="bank-answer">
+                                <span className="answer-label">الإجابة:</span>
+                                <span className="answer-text">
+                                    {currentQuestion.answer}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bank-question-card">
+                            <p style={{ color: "rgba(255,255,255,0.4)" }}>
+                                لا يوجد سؤال
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Action Buttons ── */}
+                <div className="bank-action-section">
+                    {roundEnded || questionIndex >= QUESTIONS_PER_ROUND ? (
+                        <button className="btn-end-round" onClick={endRound}>
+                            انهاء الجولة
+                        </button>
+                    ) : (
+                        <div className="answer-buttons">
+                            <button
+                                className="btn-correct"
+                                onClick={handleCorrect}
+                                disabled={!currentQuestion}>
+                                ✓ صح
+                            </button>
+                            <button
+                                className="btn-wrong"
+                                onClick={handleWrong}
+                                disabled={!currentQuestion}>
+                                ✗ خطأ
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Timer ── */}
+                <div className="bank-timer-section">
+                    <Timer
+                        time={120}
+                        currentPlayer={true}
+                        reset={timerKey}
+                        onEnd={handleTimerEnd}
+                    />
+                </div>
             </div>
-        </div>
+        </TeamNameModal>
     );
 }

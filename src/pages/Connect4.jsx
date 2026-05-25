@@ -4,6 +4,8 @@ import { fetchConnect4, fetchReplacement } from "../util/http.js";
 import GameResult from "../components/GameResult";
 import LoadingIndicator from "../components/LoadingIndicator";
 import Timer from "../components/Timer";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./Connect4.css";
 
 const TOTAL_ROUNDS = 1;
@@ -76,6 +78,7 @@ function normaliseCategory(cat) {
 }
 
 export default function Connect4() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [round] = useState(1);
     const [roundWins, setRoundWins] = useState({ p1: 0, p2: 0 });
     const [roundState, setRoundState] = useState(initRoundState(1));
@@ -260,8 +263,9 @@ export default function Connect4() {
                             teamB: newWins.p2,
                         });
                         const winner =
-                            result.winner === 1 ? "الفريق 1" : "الفريق 2";
+                            result.winner === 1 ? teamA : teamB;
                         setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                        if (isTournament) reportGameResult(result.winner === 1 ? "teamA" : "teamB");
                     }, 800);
                 } else if (draw) {
                     setTimeout(() => {
@@ -270,6 +274,7 @@ export default function Connect4() {
                             teamB: roundWins.p2,
                         });
                         setGameResult("انتهت اللعبة! تعادل!");
+                        if (isTournament) reportGameResult("draw");
                     }, 800);
                 }
             }, commitAt);
@@ -283,6 +288,10 @@ export default function Connect4() {
             orderCounter,
             bonusTurns,
             roundWins,
+            teamA,
+            teamB,
+            isTournament,
+            reportGameResult,
         ],
     );
 
@@ -397,144 +406,146 @@ export default function Connect4() {
         );
 
     return (
-        <>
-            <div className="portrait-overlay">
-                <span className="portrait-overlay-icon">📱</span>
-                <p className="portrait-overlay-title">اقلب الشاشة أفقياً</p>
-                <p className="portrait-overlay-sub">
-                    يعمل هذا اللعبة بشكل أفضل في الوضع الأفقي.
-                    <br />
-                    Please rotate your device to landscape mode.
-                </p>
-            </div>
+        <TeamNameModal>
+            <>
+                <div className="portrait-overlay">
+                    <span className="portrait-overlay-icon">📱</span>
+                    <p className="portrait-overlay-title">اقلب الشاشة أفقياً</p>
+                    <p className="portrait-overlay-sub">
+                        يعمل هذا اللعبة بشكل أفضل في الوضع الأفقي.
+                        <br />
+                        Please rotate your device to landscape mode.
+                    </p>
+                </div>
 
-            <div className="connect4-container" dir="rtl">
-                {/* ── HEADER ── */}
-                <div className="connect4-header">
-                    <div className="connect4-player-col">
-                        <div
-                            className={`connect4-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
-                            <span className="connect4-symbol">✕</span>
-                            <span>الفريق 1</span>
-                            {activePlayer === 1 && (
-                                <span className="turn-dot" />
-                            )}
+                <div className="connect4-container" dir="rtl">
+                    {/* ── HEADER ── */}
+                    <div className="connect4-header">
+                        <div className="connect4-player-col">
+                            <div
+                                className={`connect4-player-badge ${activePlayer === 1 ? "p1-active" : "p1-idle"}`}>
+                                <span className="connect4-symbol">✕</span>
+                                <span>{teamA}</span>
+                                {activePlayer === 1 && (
+                                    <span className="turn-dot" />
+                                )}
+                            </div>
+                            <StrikesDisplay player={1} />
                         </div>
-                        <StrikesDisplay player={1} />
-                    </div>
 
-                    <div className="connect4-round-info">
-                        <span className="connect4-round-label">
-                            جولة {round} / {TOTAL_ROUNDS}
-                        </span>
-                        <p className="connect4-turn-label">
-                            دور{" "}
-                            {activePlayer === 1 ? "الفريق 1 ✕" : "الفريق 2 ○"}
-                            {bonusTurns > 0 && " 🎯"}
-                        </p>
-                        {bonusTurns > 0 && (
-                            <span className="bonus-turns-label">
-                                +{bonusTurns} 🎯
+                        <div className="connect4-round-info">
+                            <span className="connect4-round-label">
+                                جولة {round} / {TOTAL_ROUNDS}
                             </span>
-                        )}
-                    </div>
-
-                    <div className="connect4-player-col">
-                        <div
-                            className={`connect4-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
-                            <span className="connect4-symbol">○</span>
-                            <span>الفريق 2</span>
-                            {activePlayer === 2 && (
-                                <span className="turn-dot" />
+                            <p className="connect4-turn-label">
+                                دور{" "}
+                                {activePlayer === 1 ? `${teamA} ✕` : `${teamB} ○`}
+                                {bonusTurns > 0 && " 🎯"}
+                            </p>
+                            {bonusTurns > 0 && (
+                                <span className="bonus-turns-label">
+                                    +{bonusTurns} 🎯
+                                </span>
                             )}
                         </div>
-                        <StrikesDisplay player={2} />
-                    </div>
-                </div>
 
-                {/* ── TIMER ── */}
-                <div className="timer-section">
-                    <Timer time={20} currentPlayer={activePlayer} />
-                </div>
-
-                {/* ── GRID ── */}
-                <div className="connect4-grid-wrapper" ref={gridWrapperRef}>
-                    {fallingBall && (
-                        <div
-                            className={`falling-ball p${fallingBall.player}${ballAnimating ? " animating" : ""}`}
-                            style={{
-                                left: fallingBall.left,
-                                top: fallingBall.top,
-                                "--drop-from": `${fallingBall.dropFrom}px`,
-                                "--drop-duration": `${fallingBall.dropDuration}s`,
-                            }}>
-                            <span className="cell-symbol"></span>
+                        <div className="connect4-player-col">
+                            <div
+                                className={`connect4-player-badge ${activePlayer === 2 ? "p2-active" : "p2-idle"}`}>
+                                <span className="connect4-symbol">○</span>
+                                <span>{teamB}</span>
+                                {activePlayer === 2 && (
+                                    <span className="turn-dot" />
+                                )}
+                            </div>
+                            <StrikesDisplay player={2} />
                         </div>
-                    )}
+                    </div>
 
-                    <div className="connect4-grid" dir="ltr">
-                        <div className="category-corner" />
-                        {categoryCols.map((col, colIdx) => (
-                            <CategoryButton
-                                key={`col-${colIdx}`}
-                                cat={categoryCols[colIdx]}
-                                tooltipKey={`col-${colIdx}`}
-                                type="col"
-                                idx={colIdx}
-                                col={true}
-                            />
-                        ))}
+                    {/* ── TIMER ── */}
+                    <div className="timer-section">
+                        <Timer time={20} currentPlayer={activePlayer} />
+                    </div>
 
-                        {cells.map((row, rowIdx) => (
-                            <Fragment key={`row-${rowIdx}`}>
+                    {/* ── GRID ── */}
+                    <div className="connect4-grid-wrapper" ref={gridWrapperRef}>
+                        {fallingBall && (
+                            <div
+                                className={`falling-ball p${fallingBall.player}${ballAnimating ? " animating" : ""}`}
+                                style={{
+                                    left: fallingBall.left,
+                                    top: fallingBall.top,
+                                    "--drop-from": `${fallingBall.dropFrom}px`,
+                                    "--drop-duration": `${fallingBall.dropDuration}s`,
+                                }}>
+                                <span className="cell-symbol"></span>
+                            </div>
+                        )}
+
+                        <div className="connect4-grid" dir="ltr">
+                            <div className="category-corner" />
+                            {categoryCols.map((col, colIdx) => (
                                 <CategoryButton
-                                    cat={categoryRows[rowIdx]}
-                                    tooltipKey={`row-${rowIdx}`}
-                                    type="row"
-                                    idx={rowIdx}
-                                    col={false}
+                                    key={`col-${colIdx}`}
+                                    cat={categoryCols[colIdx]}
+                                    tooltipKey={`col-${colIdx}`}
+                                    type="col"
+                                    idx={colIdx}
+                                    col={true}
                                 />
-                                {row.map((cell, colIdx) => (
-                                    <button
-                                        key={`${rowIdx}-${colIdx}`}
-                                        ref={(el) => {
-                                            cellRefs.current[
-                                                `${rowIdx}-${colIdx}`
-                                            ] = el;
-                                        }}
-                                        className={`connect4-cell
-                                        ${cell === null ? "empty" : ""}
-                                        ${cell?.player === 1 ? "p1" : ""}
-                                        ${cell?.player === 2 ? "p2" : ""}
-                                        ${isWinCell(rowIdx, colIdx) ? "win-cell" : ""}
-                                    `}
-                                        onClick={() =>
-                                            handleColumnClick(colIdx)
-                                        }
-                                        disabled={!!winResult || isAnimating}>
-                                        {cell?.player === 1 && (
-                                            <span className="cell-symbol"></span>
-                                        )}
-                                        {cell?.player === 2 && (
-                                            <span className="cell-symbol"></span>
-                                        )}
-                                    </button>
-                                ))}
-                            </Fragment>
-                        ))}
+                            ))}
+
+                            {cells.map((row, rowIdx) => (
+                                <Fragment key={`row-${rowIdx}`}>
+                                    <CategoryButton
+                                        cat={categoryRows[rowIdx]}
+                                        tooltipKey={`row-${rowIdx}`}
+                                        type="row"
+                                        idx={rowIdx}
+                                        col={false}
+                                    />
+                                    {row.map((cell, colIdx) => (
+                                        <button
+                                            key={`${rowIdx}-${colIdx}`}
+                                            ref={(el) => {
+                                                cellRefs.current[
+                                                    `${rowIdx}-${colIdx}`
+                                                ] = el;
+                                            }}
+                                            className={`connect4-cell
+                                            ${cell === null ? "empty" : ""}
+                                            ${cell?.player === 1 ? "p1" : ""}
+                                            ${cell?.player === 2 ? "p2" : ""}
+                                            ${isWinCell(rowIdx, colIdx) ? "win-cell" : ""}
+                                        `}
+                                            onClick={() =>
+                                                handleColumnClick(colIdx)
+                                            }
+                                            disabled={!!winResult || isAnimating}>
+                                            {cell?.player === 1 && (
+                                                <span className="cell-symbol"></span>
+                                            )}
+                                            {cell?.player === 2 && (
+                                                <span className="cell-symbol"></span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </Fragment>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* ── SKIP ── */}
+                    <div className="skip-container">
+                        <button
+                            className="skip-btn"
+                            onClick={handleSkip}
+                            disabled={isAnimating}>
+                            تخطي ({MAX_STRIKES - strikes[activePlayer]} متبقي)
+                        </button>
                     </div>
                 </div>
-
-                {/* ── SKIP ── */}
-                <div className="skip-container">
-                    <button
-                        className="skip-btn"
-                        onClick={handleSkip}
-                        disabled={isAnimating}>
-                        تخطي ({MAX_STRIKES - strikes[activePlayer]} متبقي)
-                    </button>
-                </div>
-            </div>
-        </>
+            </>
+        </TeamNameModal>
     );
 }

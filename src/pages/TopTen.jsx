@@ -6,6 +6,8 @@ import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./TopTen.css";
 import { button } from "framer-motion/client";
 
@@ -24,6 +26,7 @@ function isMatch(guess, answer) {
 }
 
 export default function TopTen() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [round, setRound] = useState(0);
     const [activeTeam, setActiveTeam] = useState(1);
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
@@ -88,9 +91,9 @@ export default function TopTen() {
                 0,
             );
             if (newScores.teamA > newScores.teamB + remainingPoints) {
-                setEarlyWin("الفريق 1");
+                setEarlyWin(teamA);
             } else if (newScores.teamB > newScores.teamA + remainingPoints) {
-                setEarlyWin("الفريق 2");
+                setEarlyWin(teamB);
             }
 
             // Check if all answers found
@@ -128,16 +131,16 @@ export default function TopTen() {
     };
 
     const endRound = (finalScores) => {
-        const { teamA, teamB } = finalScores;
+        const { teamA: tA, teamB: tB } = finalScores;
         const newWins = { ...totalWins };
         let roundWinner = null;
 
-        if (teamA > teamB) {
+        if (tA > tB) {
             newWins.teamA += 1;
-            roundWinner = "الفريق 1";
-        } else if (teamB > teamA) {
+            roundWinner = teamA;
+        } else if (tB > tA) {
             newWins.teamB += 1;
-            roundWinner = "الفريق 2";
+            roundWinner = teamB;
         }
 
         setTotalWins(newWins);
@@ -147,10 +150,15 @@ export default function TopTen() {
             // Game over
             if (newWins.teamA === newWins.teamB) {
                 setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
             } else {
                 const winner =
-                    newWins.teamA > newWins.teamB ? "الفريق 1" : "الفريق 2";
+                    newWins.teamA > newWins.teamB ? teamA : teamB;
                 setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                if (isTournament)
+                    reportGameResult(
+                        newWins.teamA > newWins.teamB ? "teamA" : "teamB",
+                    );
             }
         } else {
             setRoundSummary({
@@ -216,13 +224,13 @@ export default function TopTen() {
                     </h2>
                     <div className="summary-round-scores">
                         <div className="summary-score team-a-score">
-                            <span>الفريق 1</span>
+                            <span>{teamA}</span>
                             <strong>{roundSummary.roundScores.teamA}</strong>
                             <small>{roundSummary.wins.teamA} انتصار</small>
                         </div>
                         <div className="summary-divider">vs</div>
                         <div className="summary-score team-b-score">
-                            <span>الفريق 2</span>
+                            <span>{teamB}</span>
                             <strong>{roundSummary.roundScores.teamB}</strong>
                             <small>{roundSummary.wins.teamB} انتصار</small>
                         </div>
@@ -242,124 +250,126 @@ export default function TopTen() {
     }
 
     return (
-        <div className="topten-container" dir="rtl">
-            {!continued && (
-                <EarlyWin
-                    earlyWin={earlyWin}
-                    scores={scores}
-                    handleContinue={handleContinue}
-                    handleNewGame={handleRevealAll}
-                />
-            )}
-            {/* ── Header ── */}
-            <div className="topten-header">
-                <ScoreBoard
-                    isTurns={true}
-                    selectedTeam={activeTeam}
-                    round={round + 1}
-                    scores={scores}
-                    totalRounds={TOTAL_ROUNDS}
-                />
-                <div className="round-meta">
-                    <span
-                        className={`active-badge ${activeTeam === 1 ? "team-a-badge" : "team-b-badge"}`}>
-                        دور {activeTeam === 1 ? "الفريق 1" : "الفريق 2"}
-                    </span>
-                    <span className="wins-display">
-                        انتصارات: الفريق 1 — {totalWins.teamA} | الفريق 2 —{" "}
-                        {totalWins.teamB}
-                    </span>
-                </div>
-            </div>
-
-            {/* ── Question ── */}
-            <div className="topten-question-section">
-                <div className="topten-question-card">
-                    <p className="topten-question-text">
-                        {currentQuestion?.question}
-                    </p>
-                </div>
-
-                {/* ── 10 Answer Slots ── */}
-                <div className="topten-answers-grid">
-                    {answers.map((answer, i) => (
-                        <div
-                            key={i}
-                            className={`answer-slot ${revealed[i] ? "revealed" : "hidden"}
-                                ${revealed[i] && revealedBy[i] === 1 ? "by-team-a" : ""}
-                                ${revealed[i] && revealedBy[i] === 2 ? "by-team-b" : ""}
-                                ${revealed[i] && revealedBy[i] === null ? "revealed-all" : ""}`}>
-                            <span className="slot-index">{i + 1}</span>
-                            {revealed[i] ? (
-                                <span className="slot-answer">{answer}</span>
-                            ) : (
-                                <span className="slot-placeholder">؟؟؟</span>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* ── Input ── */}
-            <div className="topten-input-section">
-                {!allRevealed && (
-                    <>
-                        <form
-                            onSubmit={handleGuessSubmit}
-                            className={`guess-form ${wrongFlash ? "wrong-flash" : ""}`}>
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={guess}
-                                onChange={(e) => setGuess(e.target.value)}
-                                placeholder="اكتب إجابتك هنا..."
-                                className="guess-input"
-                                disabled={allRevealed}
-                                autoComplete="off"
-                                dir="rtl"
-                            />
-                            <div className="form-buttons">
-                                <button
-                                    type="button"
-                                    className="btn-skip"
-                                    onClick={handleSkip}>
-                                    Skip
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn-guess"
-                                    disabled={allRevealed || !guess.trim()}>
-                                    تأكيد
-                                </button>
-                            </div>
-                        </form>
-                        <button
-                            className="btn-reveal-all"
-                            onClick={handleRevealAll}
-                            disabled={allRevealed}>
-                            كشف جميع الإجابات
-                        </button>
-                    </>
-                )}
-                {allRevealed && (
-                    <button
-                        className="btn-end-round"
-                        onClick={() => endRound(scores)}>
-                        إنهاء الجولة
-                    </button>
-                )}
-            </div>
-
-            {/* ── Timer ── */}
-            {!allRevealed && (
-                <div className="topten-timer-section">
-                    <Timer
-                        time={20}
-                        currentPlayer={currentQuestion}
-                        reset={timerKey}
+        <TeamNameModal>
+            <div className="topten-container" dir="rtl">
+                {!continued && (
+                    <EarlyWin
+                        earlyWin={earlyWin}
+                        scores={scores}
+                        handleContinue={handleContinue}
+                        handleNewGame={handleRevealAll}
                     />
+                )}
+                {/* ── Header ── */}
+                <div className="topten-header">
+                    <ScoreBoard
+                        isTurns={true}
+                        selectedTeam={activeTeam}
+                        round={round + 1}
+                        scores={scores}
+                        totalRounds={TOTAL_ROUNDS}
+                    />
+                    <div className="round-meta">
+                        <span
+                            className={`active-badge ${activeTeam === 1 ? "team-a-badge" : "team-b-badge"}`}>
+                            دور {activeTeam === 1 ? teamA : teamB}
+                        </span>
+                        <span className="wins-display">
+                            انتصارات: {teamA} — {totalWins.teamA} | {teamB} —{" "}
+                            {totalWins.teamB}
+                        </span>
+                    </div>
                 </div>
-            )}
-        </div>
+
+                {/* ── Question ── */}
+                <div className="topten-question-section">
+                    <div className="topten-question-card">
+                        <p className="topten-question-text">
+                            {currentQuestion?.question}
+                        </p>
+                    </div>
+
+                    {/* ── 10 Answer Slots ── */}
+                    <div className="topten-answers-grid">
+                        {answers.map((answer, i) => (
+                            <div
+                                key={i}
+                                className={`answer-slot ${revealed[i] ? "revealed" : "hidden"}
+                                    ${revealed[i] && revealedBy[i] === 1 ? "by-team-a" : ""}
+                                    ${revealed[i] && revealedBy[i] === 2 ? "by-team-b" : ""}
+                                    ${revealed[i] && revealedBy[i] === null ? "revealed-all" : ""}`}>
+                                <span className="slot-index">{i + 1}</span>
+                                {revealed[i] ? (
+                                    <span className="slot-answer">{answer}</span>
+                                ) : (
+                                    <span className="slot-placeholder">؟؟؟</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Input ── */}
+                <div className="topten-input-section">
+                    {!allRevealed && (
+                        <>
+                            <form
+                                onSubmit={handleGuessSubmit}
+                                className={`guess-form ${wrongFlash ? "wrong-flash" : ""}`}>
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={guess}
+                                    onChange={(e) => setGuess(e.target.value)}
+                                    placeholder="اكتب إجابتك هنا..."
+                                    className="guess-input"
+                                    disabled={allRevealed}
+                                    autoComplete="off"
+                                    dir="rtl"
+                                />
+                                <div className="form-buttons">
+                                    <button
+                                        type="button"
+                                        className="btn-skip"
+                                        onClick={handleSkip}>
+                                        Skip
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn-guess"
+                                        disabled={allRevealed || !guess.trim()}>
+                                        تأكيد
+                                    </button>
+                                </div>
+                            </form>
+                            <button
+                                className="btn-reveal-all"
+                                onClick={handleRevealAll}
+                                disabled={allRevealed}>
+                                كشف جميع الإجابات
+                            </button>
+                        </>
+                    )}
+                    {allRevealed && (
+                        <button
+                            className="btn-end-round"
+                            onClick={() => endRound(scores)}>
+                            إنهاء الجولة
+                        </button>
+                    )}
+                </div>
+
+                {/* ── Timer ── */}
+                {!allRevealed && (
+                    <div className="topten-timer-section">
+                        <Timer
+                            time={20}
+                            currentPlayer={currentQuestion}
+                            reset={timerKey}
+                        />
+                    </div>
+                )}
+            </div>
+        </TeamNameModal>
     );
 }

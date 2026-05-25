@@ -111,3 +111,23 @@
     font-weight: 600;
     order: 2;
 }
+
+/* ── Button styles ── */
+.game-result .playAgain {
+    width: 100%;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #7fffd4 0%, #40e0d0 100%);
+    color: #120a1c;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 28px;
+}
+
+.game-result .playAgain:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(127, 255, 212, 0.3);
+}

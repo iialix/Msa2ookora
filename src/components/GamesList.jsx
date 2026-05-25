@@ -4,86 +4,23 @@ import React from "react";
 import Game from "./Game";
 import BorderGlow from "./BorderGlow";
 import "./GamesList.css";
+import gamesData from "../data/gamesData";
 
 export default function GamesList() {
-    const gamesData = [
-        {
-            id: 1,
-            title: "Password Challenge",
-            image: "/Password.png",
-            urlText: "password-challenge",
-        },
-        {
-            id: 2,
-            title: "بدون كلام",
-            image: "/bedonKalam.png",
-            urlText: "bedon-kalam",
-        },
-        {
-            id: 3,
-            title: "أنا مين",
-            image: "/anameen.png",
-            urlText: "ana-meen",
-        },
-        {
-            id: 4,
-            title: "offside",
-            image: "/offside.png",
-            urlText: "offside",
-        },
-        {
-            id: 5,
-            title: "بنك",
-            image: "/bank.png",
-            urlText: "bank",
-        },
-        {
-            id: 6,
-            title: "Top 10",
-            image: "/top10.png",
-            urlText: "top10",
-        },
-        {
-            id: 7,
-            title: "خمسة × عشرة",
-            image: "/fivexten.png",
-            urlText: "fivexten",
-        },
-        {
-            id: 8,
-            title: "Risk",
-            image: "/risk.png",
-            urlText: "risk",
-        },
-        {
-            id: 9,
-            title: "Infinity XO",
-            image: "/infinityxo.png",
-            urlText: "infinityxo",
-        },
-        {
-            id: 10,
-            title: "XO",
-            image: "/xo.png",
-            urlText: "xo",
-        },
-        {
-            id: 11,
-            title: "XOXO",
-            image: "/xo.png",
-            urlText: "xoxo",
-        },
-        {
-            id: 12,
-            title: "Connect 4",
-            image: "/connect4.png",
-            urlText: "connect4",
-        },
-    ];
-
     return (
         <section className="games-section">
             <h2 className="section-title">الألعاب</h2>
+
+            {/* Tournament CTA */}
+            <Link to="/tournament" className="tournament-cta">
+                <span className="tournament-cta-icon">🏆</span>
+                <span className="tournament-cta-text">
+                    <strong>البطولة</strong>
+                    <small>العب عدة ألعاب وتنافس على اللقب!</small>
+                </span>
+                <span className="tournament-cta-arrow">←</span>
+            </Link>
+
             <div className="games-grid">
                 {gamesData.map((game) => {
                     return (

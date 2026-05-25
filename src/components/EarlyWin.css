@@ -52,3 +52,60 @@
     flex-direction: column;
     gap: 12px;
 }
+
+/* ── Button styles (self-contained, no dependency on game CSS) ── */
+.popup-btn-primary {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #7fffd4 0%, #40e0d0 100%);
+    color: #120a1c;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.popup-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(127, 255, 212, 0.3);
+}
+
+.popup-btn-secondary {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.popup-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.popup-btn-tournament {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid rgba(127, 255, 212, 0.25);
+    border-radius: 14px;
+    background: rgba(127, 255, 212, 0.08);
+    color: #7fffd4;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.popup-btn-tournament:hover {
+    background: rgba(127, 255, 212, 0.15);
+    border-color: rgba(127, 255, 212, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(127, 255, 212, 0.2);
+}

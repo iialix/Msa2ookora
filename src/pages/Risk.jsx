@@ -6,12 +6,15 @@ import ScoreBoard from "../components/ScoreBoard";
 import GameResult from "../components/GameResult";
 import EarlyWin from "../components/EarlyWin";
 import LoadingIndicator from "../components/LoadingIndicator";
+import TeamNameModal from "../components/TeamNameModal";
+import { useTeam } from "../context/TeamContext";
 import "./Risk.css";
 
 const DIFFICULTY_LABELS = { 5: "سهل", 10: "متوسط", 20: "صعب", 40: "خبير" };
 const DIFFICULTY_ORDER = [5, 10, 20, 40];
 
 export default function Risk() {
+    const { teamA, teamB, isTournament, reportGameResult } = useTeam();
     const [activeTeam, setActiveTeam] = useState(1); // whose turn to pick
     const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
     const [usedIds, setUsedIds] = useState({}); // answered/expired questions
@@ -27,17 +30,6 @@ export default function Risk() {
 
     // Modal state
     const [modal, setModal] = useState(null);
-    /*  modal = {
-          question, answer, points, choices,
-          phase: "idle"|"timer"|"steal"|"extra"|"expired",
-          showAnswer: bool,
-          showChoices: bool,
-          stealActive: bool,     // other team is now answering
-          timerKey: number,
-          timerDuration: number,
-          stealUsedBy: null|1|2,
-        }
-    */
 
     const [gameResult, setGameResult] = useState(null);
     const [earlyWin, setEarlyWin] = useState(null);
@@ -89,11 +81,11 @@ export default function Risk() {
         if (!data || earlyWin || gameResult) return;
         const diff = scores.teamA - scores.teamB;
         if (diff > totalRemainingPoints) {
-            setEarlyWin("الفريق 1");
+            setEarlyWin(teamA);
         } else if (-diff > totalRemainingPoints) {
-            setEarlyWin("الفريق 2");
+            setEarlyWin(teamB);
         }
-    }, [scores, totalRemainingPoints, data, earlyWin, gameResult]);
+    }, [scores, totalRemainingPoints, data, earlyWin, gameResult, teamA, teamB]);
 
     const activeTeamKey = activeTeam === 1 ? "teamA" : "teamB";
     const otherTeam = activeTeam === 1 ? 2 : 1;
@@ -263,11 +255,14 @@ export default function Risk() {
         // Game ends when all questions are used (including current)
         const totalQ = data?.length || 0;
         if (Object.keys(usedIds).length + 1 >= totalQ) {
-            const { teamA, teamB } = currentScores;
-            if (teamA === teamB) setGameResult("انتهت اللعبة بالتعادل!");
-            else {
-                const winner = teamA > teamB ? "الفريق 1" : "الفريق 2";
+            const { teamA: tA, teamB: tB } = currentScores;
+            if (tA === tB) {
+                setGameResult("انتهت اللعبة بالتعادل!");
+                if (isTournament) reportGameResult("draw");
+            } else {
+                const winner = tA > tB ? teamA : teamB;
                 setGameResult(`انتهت اللعبة! الفائز هو: ${winner}`);
+                if (isTournament) reportGameResult(tA > tB ? "teamA" : "teamB");
             }
         }
     };
@@ -293,6 +288,9 @@ export default function Risk() {
         if (modal?.powerUpUsed) return false;
         return powerUps[activeTeamKey].choices && !modal.showChoices;
     };
+
+    const activeLabel = activeTeam === 1 ? teamA : teamB;
+    const otherLabel = otherTeam === 1 ? teamA : teamB;
 
     // ── Render ───────────────────────────────────────────────────
     if (isPending)
@@ -320,128 +318,88 @@ export default function Risk() {
     const categoryNames = Object.keys(categories);
 
     return (
-        <div className="risk-container" dir="rtl">
-            {/* Early win popup */}
-            {!continued && (
-                <EarlyWin
-                    earlyWin={earlyWin}
-                    scores={scores}
-                    handleContinue={handleContinue}
-                    handleNewGame={handleNewGame}
-                />
-            )}
-            {/* ── Header ── */}
-            <div className="risk-header">
-                <ScoreBoard
-                    isTurns={true}
-                    selectedTeam={activeTeam}
-                    round={Object.keys(usedIds).length + 1}
-                    scores={scores}
-                    totalRounds={data?.length || 16}
-                />
-                <div className="risk-turn-info">
-                    <span
-                        className={`active-badge ${activeTeam === 1 ? "team-a-badge" : "team-b-badge"}`}>
-                        دور {activeTeam === 1 ? "الفريق 1" : "الفريق 2"}
-                    </span>
-                    <div className="powerup-status">
-                        <span className="pu-label">
-                            مميزات الفريق {activeTeam}:
-                        </span>
+        <TeamNameModal>
+            <div className="risk-container" dir="rtl">
+                {/* Early win popup */}
+                {!continued && (
+                    <EarlyWin
+                        earlyWin={earlyWin}
+                        scores={scores}
+                        handleContinue={handleContinue}
+                        handleNewGame={handleNewGame}
+                    />
+                )}
+                {/* ── Header ── */}
+                <div className="risk-header">
+                    <ScoreBoard
+                        isTurns={true}
+                        selectedTeam={activeTeam}
+                        round={Object.keys(usedIds).length + 1}
+                        scores={scores}
+                        totalRounds={data?.length || 16}
+                    />
+                    <div className="risk-turn-info">
                         <span
-                            className={`pu-tag ${powerUps[activeTeamKey].steal ? "available" : "used"}`}>
-                            🎯 سرقة
+                            className={`active-badge ${activeTeam === 1 ? "team-a-badge" : "team-b-badge"}`}>
+                            دور {activeLabel}
                         </span>
-                        <span
-                            className={`pu-tag ${powerUps[activeTeamKey].extraTime ? "available" : "used"}`}>
-                            ⏱ وقت
-                        </span>
-                        <span
-                            className={`pu-tag ${powerUps[activeTeamKey].choices ? "available" : "used"}`}>
-                            💡 خيارات
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Board (desktop: grid by difficulty rows, mobile: stacked by category) ── */}
-            {/* Desktop layout */}
-            <div className="risk-board risk-board-desktop">
-                {/* Category headers */}
-                <div className="risk-categories-row">
-                    {categoryNames.map((cat) => (
-                        <div key={cat} className="risk-category-header">
-                            {cat}
+                        <div className="powerup-status">
+                            <span className="pu-label">
+                                مميزات {activeLabel}:
+                            </span>
+                            <span
+                                className={`pu-tag ${powerUps[activeTeamKey].steal ? "available" : "used"}`}>
+                                🎯 سرقة
+                            </span>
+                            <span
+                                className={`pu-tag ${powerUps[activeTeamKey].extraTime ? "available" : "used"}`}>
+                                ⏱ وقت
+                            </span>
+                            <span
+                                className={`pu-tag ${powerUps[activeTeamKey].choices ? "available" : "used"}`}>
+                                💡 خيارات
+                            </span>
                         </div>
-                    ))}
+                    </div>
                 </div>
 
-                {/* Question cells — rows by difficulty */}
-                {DIFFICULTY_ORDER.map((diff) => (
-                    <div key={diff} className="risk-row">
-                        {categoryNames.map((cat) => {
-                            const q = categories[cat]?.find(
-                                (q) => q.difficulty === diff,
-                            );
-                            if (!q)
-                                return (
-                                    <div
-                                        key={cat}
-                                        className="risk-cell empty"
-                                    />
-                                );
-                            const isUsed = usedIds[q.id] !== undefined;
-                            const usedBy = usedIds[q.id];
-                            const pts = diff;
-                            return (
-                                <button
-                                    key={q.id}
-                                    className={`risk-cell ${isUsed ? "used" : "available"} ${usedBy === 1 ? "team-a" : ""} ${usedBy === 2 ? "team-b" : ""} `}
-                                    onClick={() => !isUsed && openQuestion(q)}
-                                    disabled={isUsed}>
-                                    {isUsed ? (
-                                        <span className={`cell-used-icon`}>
-                                            ✓
-                                        </span>
-                                    ) : (
-                                        <>
-                                            <span className="cell-points">
-                                                {pts}
-                                            </span>
-                                        </>
-                                    )}
-                                </button>
-                            );
-                        })}
+                {/* ── Board (desktop: grid by difficulty rows, mobile: stacked by category) ── */}
+                {/* Desktop layout */}
+                <div className="risk-board risk-board-desktop">
+                    {/* Category headers */}
+                    <div className="risk-categories-row">
+                        {categoryNames.map((cat) => (
+                            <div key={cat} className="risk-category-header">
+                                {cat}
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
 
-            {/* Mobile layout — each category stacked with its questions */}
-            <div className="risk-board risk-board-mobile">
-                {categoryNames.map((cat) => (
-                    <div key={cat} className="risk-category-block">
-                        <div className="risk-category-header">{cat}</div>
-                        <div className="risk-category-questions">
-                            {DIFFICULTY_ORDER.map((diff) => {
+                    {/* Question cells — rows by difficulty */}
+                    {DIFFICULTY_ORDER.map((diff) => (
+                        <div key={diff} className="risk-row">
+                            {categoryNames.map((cat) => {
                                 const q = categories[cat]?.find(
                                     (q) => q.difficulty === diff,
                                 );
-                                if (!q) return null;
+                                if (!q)
+                                    return (
+                                        <div
+                                            key={cat}
+                                            className="risk-cell empty"
+                                        />
+                                    );
                                 const isUsed = usedIds[q.id] !== undefined;
                                 const usedBy = usedIds[q.id];
-
                                 const pts = diff;
                                 return (
                                     <button
                                         key={q.id}
-                                        className={`risk-cell ${isUsed ? "used" : "available"} ${usedBy === 1 ? "team-a" : ""} ${usedBy === 2 ? "team-b" : ""}`}
-                                        onClick={() =>
-                                            !isUsed && openQuestion(q)
-                                        }
+                                        className={`risk-cell ${isUsed ? "used" : "available"} ${usedBy === 1 ? "team-a" : ""} ${usedBy === 2 ? "team-b" : ""} `}
+                                        onClick={() => !isUsed && openQuestion(q)}
                                         disabled={isUsed}>
                                         {isUsed ? (
-                                            <span className={`cell-used-icon `}>
+                                            <span className={`cell-used-icon`}>
                                                 ✓
                                             </span>
                                         ) : (
@@ -449,160 +407,200 @@ export default function Risk() {
                                                 <span className="cell-points">
                                                     {pts}
                                                 </span>
-                                                <span className="cell-difficulty">
-                                                    {DIFFICULTY_LABELS[diff]}
-                                                </span>
                                             </>
                                         )}
                                     </button>
                                 );
                             })}
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* ── Modal ── */}
-            {modal && (
-                <div
-                    className="risk-overlay"
-                    onClick={(e) => e.target === e.currentTarget && null}>
-                    <div className="risk-modal" dir="rtl">
-                        {/* Modal Header */}
-                        <div className="modal-header">
-                            <span
-                                className={`modal-points-badge ${modal.isDouble ? "double" : ""}`}>
-                                {modal.points} نقطة{" "}
-                                {modal.isDouble ? "⚡×2" : ""}
-                            </span>
-                            {modal.phase === "steal" && (
-                                <span className="steal-active-badge">
-                                    🎯 دور{" "}
-                                    {otherTeam === 1 ? "الفريق 1" : "الفريق 2"}{" "}
-                                    — سرقة!
-                                </span>
-                            )}
-                            {modal.phase === "expired" && (
-                                <span className="expired-badge">
-                                    ⏰ انتهى الوقت
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Question */}
-                        <p className="modal-question">{modal.question}</p>
-
-                        {/* Choices */}
-                        {modal.showChoices && (
-                            <div className="modal-choices">
-                                {shuffledChoices.map((c, i) => (
-                                    <div key={i} className="modal-choice">
-                                        {c}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Answer reveal */}
-                        {modal.showAnswer ? (
-                            <div className="modal-answer">
-                                <span className="answer-label">الإجابة:</span>
-                                <span className="answer-text">
-                                    {modal.answer}
-                                </span>
-                            </div>
-                        ) : (
-                            <button
-                                className="btn-show-answer"
-                                onClick={() =>
-                                    setModal((m) => ({
-                                        ...m,
-                                        showAnswer: true,
-                                    }))
-                                }>
-                                عرض الإجابة
-                            </button>
-                        )}
-
-                        {/* Timer */}
-                        {modal.phase !== "idle" &&
-                            modal.phase !== "expired" && (
-                                <div className="modal-timer">
-                                    <Timer
-                                        key={modal.timerKey}
-                                        time={modal.timerDuration}
-                                        currentPlayer={modal.question}
-                                        reset={modal.timerKey}
-                                        onEnd={handleTimerEnd}
-                                        addedTime={extraTime}
-                                    />
-                                </div>
-                            )}
-
-                        {/* Action Row */}
-                        <div className="modal-actions">
-                            {/* Start timer */}
-                            {modal.phase === "idle" && (
-                                <button
-                                    className="btn-modal btn-start-timer"
-                                    onClick={handleStartTimer}>
-                                    ⏱ ابدأ المؤقت
-                                </button>
-                            )}
-
-                            {/* Power-ups row */}
-                            <div className="powerup-row">
-                                {canSteal() && (
-                                    <button
-                                        className="btn-modal btn-steal"
-                                        onClick={handleSteal}>
-                                        🎯 سرقة
-                                    </button>
-                                )}
-                                {canExtraTime() && (
-                                    <button
-                                        className="btn-modal btn-extra"
-                                        onClick={handleExtraTime}>
-                                        ⏱ وقت إضافي
-                                    </button>
-                                )}
-                                {canChoices() && (
-                                    <button
-                                        className="btn-modal btn-choices"
-                                        onClick={handleChoices}>
-                                        💡 خيارات
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Correct / Wrong */}
-                            {modal.phase !== "idle" && (
-                                <div className="answer-buttons">
-                                    <button
-                                        className="btn-modal btn-correct"
-                                        onClick={handleCorrect}>
-                                        ✓ صح
-                                    </button>
-                                    <button
-                                        className="btn-modal btn-wrong"
-                                        onClick={handleWrong}>
-                                        ✗ خطأ
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Close after expiry */}
-                            {modal.phase === "expired" && (
-                                <button
-                                    className="btn-modal btn-close-expired"
-                                    onClick={closeModal}>
-                                    اغلاق النافذة
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                    ))}
                 </div>
-            )}
-        </div>
+
+                {/* Mobile layout — each category stacked with its questions */}
+                <div className="risk-board risk-board-mobile">
+                    {categoryNames.map((cat) => (
+                        <div key={cat} className="risk-category-block">
+                            <div className="risk-category-header">{cat}</div>
+                            <div className="risk-category-questions">
+                                {DIFFICULTY_ORDER.map((diff) => {
+                                    const q = categories[cat]?.find(
+                                        (q) => q.difficulty === diff,
+                                    );
+                                    if (!q) return null;
+                                    const isUsed = usedIds[q.id] !== undefined;
+                                    const usedBy = usedIds[q.id];
+
+                                    const pts = diff;
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            className={`risk-cell ${isUsed ? "used" : "available"} ${usedBy === 1 ? "team-a" : ""} ${usedBy === 2 ? "team-b" : ""}`}
+                                            onClick={() =>
+                                                !isUsed && openQuestion(q)
+                                            }
+                                            disabled={isUsed}>
+                                            {isUsed ? (
+                                                <span className={`cell-used-icon `}>
+                                                    ✓
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className="cell-points">
+                                                        {pts}
+                                                    </span>
+                                                    <span className="cell-difficulty">
+                                                        {DIFFICULTY_LABELS[diff]}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* ── Modal ── */}
+                {modal && (
+                    <div
+                        className="risk-overlay"
+                        onClick={(e) => e.target === e.currentTarget && null}>
+                        <div className="risk-modal" dir="rtl">
+                            {/* Modal Header */}
+                            <div className="modal-header">
+                                <span
+                                    className={`modal-points-badge ${modal.isDouble ? "double" : ""}`}>
+                                    {modal.points} نقطة{" "}
+                                    {modal.isDouble ? "⚡×2" : ""}
+                                </span>
+                                {modal.phase === "steal" && (
+                                    <span className="steal-active-badge">
+                                        🎯 دور {otherLabel} — سرقة!
+                                    </span>
+                                )}
+                                {modal.phase === "expired" && (
+                                    <span className="expired-badge">
+                                        ⏰ انتهى الوقت
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Question */}
+                            <p className="modal-question">{modal.question}</p>
+
+                            {/* Choices */}
+                            {modal.showChoices && (
+                                <div className="modal-choices">
+                                    {shuffledChoices.map((c, i) => (
+                                        <div key={i} className="modal-choice">
+                                            {c}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Answer reveal */}
+                            {modal.showAnswer ? (
+                                <div className="modal-answer">
+                                    <span className="answer-label">الإجابة:</span>
+                                    <span className="answer-text">
+                                        {modal.answer}
+                                    </span>
+                                </div>
+                            ) : (
+                                <button
+                                    className="btn-show-answer"
+                                    onClick={() =>
+                                        setModal((m) => ({
+                                            ...m,
+                                            showAnswer: true,
+                                        }))
+                                    }>
+                                    عرض الإجابة
+                                </button>
+                            )}
+
+                            {/* Timer */}
+                            {modal.phase !== "idle" &&
+                                modal.phase !== "expired" && (
+                                    <div className="modal-timer">
+                                        <Timer
+                                            key={modal.timerKey}
+                                            time={modal.timerDuration}
+                                            currentPlayer={modal.question}
+                                            reset={modal.timerKey}
+                                            onEnd={handleTimerEnd}
+                                            addedTime={extraTime}
+                                        />
+                                    </div>
+                                )}
+
+                            {/* Action Row */}
+                            <div className="modal-actions">
+                                {/* Start timer */}
+                                {modal.phase === "idle" && (
+                                    <button
+                                        className="btn-modal btn-start-timer"
+                                        onClick={handleStartTimer}>
+                                        ⏱ ابدأ المؤقت
+                                    </button>
+                                )}
+
+                                {/* Power-ups row */}
+                                <div className="powerup-row">
+                                    {canSteal() && (
+                                        <button
+                                            className="btn-modal btn-steal"
+                                            onClick={handleSteal}>
+                                            🎯 سرقة
+                                        </button>
+                                    )}
+                                    {canExtraTime() && (
+                                        <button
+                                            className="btn-modal btn-extra"
+                                            onClick={handleExtraTime}>
+                                            ⏱ وقت إضافي
+                                        </button>
+                                    )}
+                                    {canChoices() && (
+                                        <button
+                                            className="btn-modal btn-choices"
+                                            onClick={handleChoices}>
+                                            💡 خيارات
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Correct / Wrong */}
+                                {modal.phase !== "idle" && (
+                                    <div className="answer-buttons">
+                                        <button
+                                            className="btn-modal btn-correct"
+                                            onClick={handleCorrect}>
+                                            ✓ صح
+                                        </button>
+                                        <button
+                                            className="btn-modal btn-wrong"
+                                            onClick={handleWrong}>
+                                            ✗ خطأ
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Close after expiry */}
+                                {modal.phase === "expired" && (
+                                    <button
+                                        className="btn-modal btn-close-expired"
+                                        onClick={closeModal}>
+                                        اغلاق النافذة
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </TeamNameModal>
     );
 }
